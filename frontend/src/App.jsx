@@ -11,6 +11,13 @@ import AddMedicinePage from './pages/medicines/AddMedicinePage';
 import EditMedicinePage from './pages/medicines/EditMedicinePage';
 import MedicineDetailsPage from './pages/medicines/MedicineDetailsPage';
 
+// Phase 3: Inventory Pages
+import InventoryDashboardPage from './pages/inventory/InventoryDashboardPage';
+import StockListPage from './pages/inventory/StockListPage';
+import AddStockPage from './pages/inventory/AddStockPage';
+import BatchDetailsPage from './pages/inventory/BatchDetailsPage';
+import StockTransactionsPage from './pages/inventory/StockTransactionsPage';
+
 function App() {
   return (
     <BrowserRouter>
@@ -36,7 +43,10 @@ function App() {
               </ProtectedRoute>
             }
           >
+            {/* Dashboard */}
             <Route path="/dashboard" element={<DashboardPage />} />
+
+            {/* Medicine Management (Phase 2) */}
             <Route path="/medicines" element={<MedicineListPage />} />
             <Route
               path="/medicines/new"
@@ -55,6 +65,20 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Inventory Management (Phase 3) */}
+            <Route path="/inventory" element={<InventoryDashboardPage />} />
+            <Route path="/inventory/stock" element={<StockListPage />} />
+            <Route
+              path="/inventory/stock-in"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'inventory_manager']}>
+                  <AddStockPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/inventory/batches/:id" element={<BatchDetailsPage />} />
+            <Route path="/inventory/transactions" element={<StockTransactionsPage />} />
           </Route>
 
           {/* Fallback Root & Unknown Routes */}

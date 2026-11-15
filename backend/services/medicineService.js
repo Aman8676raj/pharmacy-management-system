@@ -295,3 +295,4 @@ class MedicineService {
 }
 
 module.exports = new MedicineService();
+

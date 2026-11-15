@@ -79,3 +79,4 @@ export const MedicineStats = ({ stats, isLoading = false }) => {
 };
 
 export default MedicineStats;
+

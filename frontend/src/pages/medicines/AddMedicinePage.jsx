@@ -81,3 +81,4 @@ export const AddMedicinePage = () => {
 };
 
 export default AddMedicinePage;
+

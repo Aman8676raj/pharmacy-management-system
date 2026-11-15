@@ -164,3 +164,4 @@ export const MedicineDetailsModal = ({ medicine, isOpen, onClose }) => {
 };
 
 export default MedicineDetailsModal;
+

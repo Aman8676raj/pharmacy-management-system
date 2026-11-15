@@ -377,3 +377,4 @@ export const MedicineDetailsPage = () => {
 };
 
 export default MedicineDetailsPage;
+

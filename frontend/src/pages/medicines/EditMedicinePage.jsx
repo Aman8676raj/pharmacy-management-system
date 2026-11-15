@@ -120,3 +120,4 @@ export const EditMedicinePage = () => {
 };
 
 export default EditMedicinePage;
+

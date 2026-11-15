@@ -218,3 +218,4 @@ export const MedicineTable = ({
 };
 
 export default MedicineTable;
+

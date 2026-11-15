@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Archive,
   Database,
+  Boxes,
 } from 'lucide-react';
 import StatCard from '../../components/dashboard/StatCard';
 import SalesOverviewChart from '../../components/dashboard/SalesOverviewChart';
@@ -22,12 +23,16 @@ import { SAMPLE_DASHBOARD_DATA, ROLE_LABELS, ROLE_COLORS } from '../../utils/con
 import { useAuth } from '../../hooks/useAuth';
 import { formatDate } from '../../utils/formatters';
 import medicineService from '../../services/medicineService';
+import inventoryService from '../../services/inventoryService';
 
 export const DashboardPage = () => {
   const { user } = useAuth();
   const { stats: sampleStats } = SAMPLE_DASHBOARD_DATA;
 
   const [liveMedicineStats, setLiveMedicineStats] = useState(null);
+  const [liveInventorySummary, setLiveInventorySummary] = useState(null);
+  const [liveLowStock, setLiveLowStock] = useState([]);
+  const [liveExpiring, setLiveExpiring] = useState([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   const todayDateString = new Intl.DateTimeFormat('en-US', {
@@ -38,20 +43,35 @@ export const DashboardPage = () => {
   }).format(new Date());
 
   useEffect(() => {
-    const fetchLiveStats = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const res = await medicineService.getMedicineStats();
-        if (res.success && res.data) {
-          setLiveMedicineStats(res.data);
+        const [medsRes, invSummaryRes, lowRes, expRes] = await Promise.allSettled([
+          medicineService.getMedicineStats(),
+          inventoryService.getInventorySummary(),
+          inventoryService.getLowStockMedicines(),
+          inventoryService.getExpiringBatches(90),
+        ]);
+
+        if (medsRes.status === 'fulfilled' && medsRes.value.success) {
+          setLiveMedicineStats(medsRes.value.data);
+        }
+        if (invSummaryRes.status === 'fulfilled' && invSummaryRes.value.success) {
+          setLiveInventorySummary(invSummaryRes.value.data);
+        }
+        if (lowRes.status === 'fulfilled' && lowRes.value.success) {
+          setLiveLowStock(lowRes.value.data?.medicines || lowRes.value.data || []);
+        }
+        if (expRes.status === 'fulfilled' && expRes.value.success) {
+          setLiveExpiring(expRes.value.data?.batches || expRes.value.data || []);
         }
       } catch (err) {
-        console.error('Error fetching live medicine stats for dashboard:', err);
+        console.error('Error fetching dashboard live data:', err);
       } finally {
         setIsLoadingStats(false);
       }
     };
 
-    fetchLiveStats();
+    fetchDashboardData();
   }, []);
 
   return (
@@ -62,7 +82,7 @@ export const DashboardPage = () => {
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-200 border border-teal-400/30 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-teal-300" />
-              Phase 2: Medicine Management Active
+              Phase 3: Inventory Management Active
             </span>
             <span className="text-xs text-teal-200/80 flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
@@ -78,7 +98,7 @@ export const DashboardPage = () => {
             <strong className="text-white">
               {ROLE_LABELS[user?.role] || user?.role}
             </strong>
-            . Complete MongoDB Medicine Management CRUD, role-based authorization, and real-time catalog metrics are active.
+            . Complete MongoDB Medicine formulary, batch-level stock tracking, FEFO expiry schedules, and movement audit logs are active.
           </p>
         </div>
 
@@ -99,7 +119,7 @@ export const DashboardPage = () => {
       <div className="bg-teal-50/70 border border-teal-200/80 rounded-xl px-4 py-3 flex items-start gap-3 text-xs text-teal-950">
         <Database className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" />
         <div className="leading-relaxed">
-          <span className="font-semibold text-teal-900">Database Integration Active:</span> The <strong>Total Medicines</strong> card and the <strong>Recently Added Medicines</strong> section below are connected directly to live MongoDB records (Phase 2). Sales and Billing, Inventory stock batches, and Supplier orders remain curated sample data until Phase 3 and Phase 4.
+          <span className="font-semibold text-teal-900">Database Integration Active:</span> <strong>Total Medicines</strong>, <strong>Low Stock Medicines</strong>, <strong>Expiring Batches</strong>, and <strong>Recently Added Medicines</strong> are connected live to MongoDB records (Phases 1-3). Sales &amp; Billing charts and Supplier directory remain curated preview data for Phases 4 and 5.
         </div>
       </div>
 
@@ -135,6 +155,34 @@ export const DashboardPage = () => {
           </div>
         </div>
 
+        {/* Low Stock Medicines (LIVE MONGODB DATA - PHASE 3) */}
+        <div className="relative">
+          <StatCard
+            title="Low Stock Medicines"
+            value={
+              isLoadingStats
+                ? 'Loading...'
+                : `${liveInventorySummary?.lowStockMedicineCount ?? 0}`
+            }
+            change={
+              isLoadingStats
+                ? '...'
+                : `${liveInventorySummary?.expiringSoonCount ?? 0} Expiring Soon`
+            }
+            trend={
+              liveInventorySummary?.lowStockMedicineCount > 0 ? 'warning' : 'up'
+            }
+            detail="Below minimum threshold in live DB"
+            icon={AlertTriangle}
+            accentColor="amber"
+          />
+          <div className="absolute top-2.5 right-2.5">
+            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+              Live DB
+            </span>
+          </div>
+        </div>
+
         {/* Today's Sales (Sample data for future phase) */}
         <div className="relative">
           <StatCard
@@ -153,24 +201,6 @@ export const DashboardPage = () => {
           </div>
         </div>
 
-        {/* Low Stock Medicines (Sample data for Phase 3 Inventory) */}
-        <div className="relative">
-          <StatCard
-            title={sampleStats.lowStockMedicines.label}
-            value={sampleStats.lowStockMedicines.value}
-            change={sampleStats.lowStockMedicines.change}
-            trend={sampleStats.lowStockMedicines.trend}
-            detail="Phase 3 Inventory Preview"
-            icon={AlertTriangle}
-            accentColor="amber"
-          />
-          <div className="absolute top-2.5 right-2.5">
-            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
-              Sample Data
-            </span>
-          </div>
-        </div>
-
         {/* Total Suppliers (Sample data for future phase) */}
         <div className="relative">
           <StatCard
@@ -178,7 +208,7 @@ export const DashboardPage = () => {
             value={sampleStats.totalSuppliers.value}
             change={sampleStats.totalSuppliers.change}
             trend={sampleStats.totalSuppliers.trend}
-            detail="Phase 3 Supplier Preview"
+            detail="Phase 5 Supplier Preview"
             icon={Truck}
             accentColor="purple"
           />
@@ -190,7 +220,7 @@ export const DashboardPage = () => {
         </div>
       </div>
 
-      {/* NEW: Live Recently Added Medicines from MongoDB */}
+      {/* Live Recently Added Medicines from MongoDB */}
       <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -228,7 +258,7 @@ export const DashboardPage = () => {
                 <th className="px-5 py-3">Medicine Name</th>
                 <th className="px-5 py-3">Generic Entity</th>
                 <th className="px-5 py-3">Category</th>
-                <th className="px-5 py-3">Dosage & Strength</th>
+                <th className="px-5 py-3">Dosage &amp; Strength</th>
                 <th className="px-5 py-3 font-mono">SKU</th>
                 <th className="px-5 py-3">Date Registered</th>
                 <th className="px-5 py-3 text-right">Action</th>
@@ -280,15 +310,15 @@ export const DashboardPage = () => {
         </div>
       </div>
 
+      {/* Previews: Low Stock & Expiring Medicines (NOW CONNECTED TO LIVE INVENTORY) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LowStockPreview items={liveLowStock} isLive={true} />
+        <ExpiringMedicinesPreview items={liveExpiring} isLive={true} />
+      </div>
+
       {/* Sales Overview Chart (Sample Data) */}
       <div className="grid grid-cols-1 gap-6">
         <SalesOverviewChart />
-      </div>
-
-      {/* Previews: Low Stock & Expiring Medicines (Sample Data for Phase 3) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <LowStockPreview />
-        <ExpiringMedicinesPreview />
       </div>
 
       {/* Recent Transactions Table (Sample Data for Phase 4) */}

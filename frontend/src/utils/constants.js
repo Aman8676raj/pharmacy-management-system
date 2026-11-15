@@ -47,9 +47,8 @@ export const NAVIGATION_ITEMS = [
     label: 'Inventory',
     icon: 'Boxes',
     path: '/inventory',
-    enabled: false,
-    badge: 'Coming Soon',
-    roles: [USER_ROLES.ADMIN, USER_ROLES.PHARMACIST, USER_ROLES.INVENTORY_MANAGER],
+    enabled: true,
+    roles: [USER_ROLES.ADMIN, USER_ROLES.INVENTORY_MANAGER, USER_ROLES.PHARMACIST, USER_ROLES.CASHIER],
   },
   {
     id: 'suppliers',
@@ -337,5 +336,69 @@ export const COMMON_CATEGORIES = [
   'Vitamins & Supplements',
   'Other',
 ];
+
+// Inventory Batch Statuses
+export const BATCH_STATUS_CONFIGS = {
+  active: {
+    label: 'Active Stock',
+    badgeVariant: 'success',
+    color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+  },
+  depleted: {
+    label: 'Depleted (0 Units)',
+    badgeVariant: 'neutral',
+    color: 'text-slate-600 bg-slate-100 border-slate-200',
+  },
+  expired: {
+    label: 'Expired',
+    badgeVariant: 'danger',
+    color: 'text-rose-700 bg-rose-50 border-rose-200',
+  },
+  quarantined: {
+    label: 'Quarantined',
+    badgeVariant: 'warning',
+    color: 'text-amber-800 bg-amber-50 border-amber-300',
+  },
+};
+
+// Inventory Transaction Types
+export const TRANSACTION_TYPE_CONFIGS = {
+  stock_in: {
+    label: 'Stock Intake',
+    color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+    sign: '+',
+  },
+  stock_out: {
+    label: 'Stock Issue',
+    color: 'text-blue-700 bg-blue-50 border-blue-200',
+    sign: '-',
+  },
+  adjustment_in: {
+    label: 'Adjustment (+)',
+    color: 'text-teal-700 bg-teal-50 border-teal-200',
+    sign: '+',
+  },
+  adjustment_out: {
+    label: 'Adjustment (-)',
+    color: 'text-rose-700 bg-rose-50 border-rose-200',
+    sign: '-',
+  },
+  return_in: {
+    label: 'Customer Return',
+    color: 'text-purple-700 bg-purple-50 border-purple-200',
+    sign: '+',
+  },
+  quarantine: {
+    label: 'Quarantine Hold',
+    color: 'text-amber-800 bg-amber-50 border-amber-300',
+    sign: '!',
+  },
+  release: {
+    label: 'Quarantine Release',
+    color: 'text-indigo-700 bg-indigo-50 border-indigo-200',
+    sign: '✓',
+  },
+};
+
 
 

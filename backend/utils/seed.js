@@ -5,6 +5,8 @@ dotenv.config();
 
 const User = require('../models/User');
 const Medicine = require('../models/Medicine');
+const MedicineBatch = require('../models/MedicineBatch');
+const InventoryTransaction = require('../models/InventoryTransaction');
 
 const demoUsers = [
   {
@@ -107,7 +109,7 @@ const initialMedicines = [
     barcode: '890103001004',
     sku: 'MED-METF-500',
     requiresPrescription: true,
-    minimumStock: 60,
+    minimumStock: 60, // Minimum is 60, will seed with 15 units to trigger Low Stock!
     isActive: true,
   },
   {
@@ -234,7 +236,7 @@ const initialMedicines = [
     sku: 'MED-ASPI-OLD',
     requiresPrescription: false,
     minimumStock: 10,
-    isActive: false, // Testing inactive exclusion
+    isActive: false,
   },
 ];
 
@@ -244,7 +246,7 @@ const seedDatabase = async () => {
     await mongoose.connect(mongoUri);
     console.log('[Seed] Connected to MongoDB');
 
-    // Clean up demo accounts & re-create
+    // 1. Seed demo accounts
     console.log('[Seed] Seeding demo accounts...');
     await User.deleteMany({ email: { $in: demoUsers.map((u) => u.email) } });
 
@@ -255,16 +257,188 @@ const seedDatabase = async () => {
       console.log(`  -> Created ${userData.role.toUpperCase()}: ${userData.email}`);
     }
 
-    // Seed initial medicines
+    // 2. Seed initial medicines
     console.log('[Seed] Seeding initial medicines...');
     await Medicine.deleteMany({});
 
+    const createdMeds = {};
     for (const medData of initialMedicines) {
-      await Medicine.create({
+      const med = await Medicine.create({
         ...medData,
         createdBy: createdUsers.admin._id,
       });
-      console.log(`  -> Seeded Medicine: [${medData.sku}] ${medData.name} (${medData.category})`);
+      createdMeds[med.sku] = med;
+      console.log(`  -> Seeded Medicine: [${medData.sku}] ${medData.name}`);
+    }
+
+    // 3. Seed initial inventory batches & transactions
+    console.log('[Seed] Seeding inventory batches & transaction logs...');
+    await MedicineBatch.deleteMany({});
+    await InventoryTransaction.deleteMany({});
+
+    const now = new Date();
+
+    const addDays = (d, days) => {
+      const res = new Date(d);
+      res.setDate(res.getDate() + days);
+      return res;
+    };
+
+    const initialBatches = [
+      // Paracetamol Batch 1 (Safe stock, FEFO second)
+      {
+        medicineSku: 'MED-PARA-500',
+        batchNumber: 'BT-PARA-001',
+        manufacturingDate: addDays(now, -90),
+        expiryDate: addDays(now, 365), // 1 year
+        purchasePrice: 2.50,
+        sellingPrice: 4.50,
+        quantityReceived: 100,
+        availableQuantity: 100,
+        supplierName: 'Apex Health Distributors',
+        status: 'active',
+      },
+      // Paracetamol Batch 2 (Expiring in 45 days -> FEFO first, expiring soon!)
+      {
+        medicineSku: 'MED-PARA-500',
+        batchNumber: 'BT-PARA-002',
+        manufacturingDate: addDays(now, -180),
+        expiryDate: addDays(now, 45), // 45 days (Expiring soon)
+        purchasePrice: 2.30,
+        sellingPrice: 4.20,
+        quantityReceived: 50,
+        availableQuantity: 50,
+        supplierName: 'Apex Health Distributors',
+        status: 'active',
+      },
+      // Amoxicillin Batch (Safe stock)
+      {
+        medicineSku: 'MED-AMOX-500',
+        batchNumber: 'BT-AMOX-101',
+        manufacturingDate: addDays(now, -60),
+        expiryDate: addDays(now, 240),
+        purchasePrice: 8.50,
+        sellingPrice: 14.00,
+        quantityReceived: 80,
+        availableQuantity: 80,
+        supplierName: 'Global Pharma Logistics',
+        status: 'active',
+      },
+      // Cetirizine Batch (Safe stock)
+      {
+        medicineSku: 'MED-CETI-010',
+        batchNumber: 'BT-CETI-201',
+        manufacturingDate: addDays(now, -40),
+        expiryDate: addDays(now, 300),
+        purchasePrice: 3.20,
+        sellingPrice: 6.00,
+        quantityReceived: 60,
+        availableQuantity: 60,
+        supplierName: 'MediSupply Co.',
+        status: 'active',
+      },
+      // Metformin Batch (Low Stock trigger: minimumStock is 60, available is only 15)
+      {
+        medicineSku: 'MED-METF-500',
+        batchNumber: 'BT-METF-301',
+        manufacturingDate: addDays(now, -100),
+        expiryDate: addDays(now, 150),
+        purchasePrice: 4.00,
+        sellingPrice: 7.50,
+        quantityReceived: 50,
+        availableQuantity: 15, // Low stock deficit!
+        supplierName: 'Novartis Direct',
+        status: 'active',
+      },
+      // Omeprazole Batch (Expiring in 18 days -> Urgent Expiring Soon!)
+      {
+        medicineSku: 'MED-OMEP-020',
+        batchNumber: 'BT-OMEP-401',
+        manufacturingDate: addDays(now, -200),
+        expiryDate: addDays(now, 18), // 18 days
+        purchasePrice: 5.50,
+        sellingPrice: 9.90,
+        quantityReceived: 70,
+        availableQuantity: 70,
+        supplierName: 'BioHealth Corp',
+        status: 'active',
+      },
+      // Salbutamol Inhaler Batch (Quarantined testing)
+      {
+        medicineSku: 'MED-SALB-100',
+        batchNumber: 'BT-SALB-501',
+        manufacturingDate: addDays(now, -50),
+        expiryDate: addDays(now, 180),
+        purchasePrice: 12.00,
+        sellingPrice: 19.50,
+        quantityReceived: 30,
+        availableQuantity: 30,
+        supplierName: 'Cipla Respiratory Dist.',
+        status: 'quarantined',
+      },
+      // Ibuprofen Batch (Expired testing: expired 10 days ago)
+      {
+        medicineSku: 'MED-IBUP-400',
+        batchNumber: 'BT-IBUP-601',
+        manufacturingDate: addDays(now, -380),
+        expiryDate: addDays(now, -10), // Expired!
+        purchasePrice: 1.80,
+        sellingPrice: 3.50,
+        quantityReceived: 40,
+        availableQuantity: 40,
+        supplierName: 'Abbott Logistics',
+        status: 'expired',
+      },
+    ];
+
+    for (const bData of initialBatches) {
+      const med = createdMeds[bData.medicineSku];
+      if (!med) continue;
+
+      const batch = await MedicineBatch.create({
+        medicine: med._id,
+        batchNumber: bData.batchNumber,
+        manufacturingDate: bData.manufacturingDate,
+        expiryDate: bData.expiryDate,
+        purchasePrice: bData.purchasePrice,
+        sellingPrice: bData.sellingPrice,
+        quantityReceived: bData.quantityReceived,
+        availableQuantity: bData.availableQuantity,
+        receivedDate: bData.manufacturingDate,
+        supplierName: bData.supplierName,
+        status: bData.status,
+        createdBy: createdUsers.admin._id,
+      });
+
+      // Record initial stock_in transaction
+      await InventoryTransaction.create({
+        medicine: med._id,
+        batch: batch._id,
+        transactionType: 'stock_in',
+        quantity: bData.quantityReceived,
+        previousQuantity: 0,
+        newQuantity: bData.quantityReceived,
+        reason: 'Initial warehouse intake',
+        reference: `PO-${bData.batchNumber}`,
+        performedBy: createdUsers.admin._id,
+        createdAt: bData.manufacturingDate,
+      });
+
+      // If quarantined, log quarantine transaction
+      if (bData.status === 'quarantined') {
+        await InventoryTransaction.create({
+          medicine: med._id,
+          batch: batch._id,
+          transactionType: 'quarantine',
+          quantity: bData.availableQuantity,
+          previousQuantity: bData.availableQuantity,
+          newQuantity: bData.availableQuantity,
+          reason: 'Routine quality assurance seal inspection',
+          performedBy: createdUsers.admin._id,
+        });
+      }
+
+      console.log(`  -> Seeded Batch: [${batch.batchNumber}] for ${med.name} (Status: ${batch.status}, Available: ${batch.availableQuantity})`);
     }
 
     console.log('[Seed] Seeding completed successfully!');
