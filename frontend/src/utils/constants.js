@@ -68,12 +68,11 @@ export const NAVIGATION_ITEMS = [
   },
   {
     id: 'sales',
-    label: 'Sales & Billing',
+    label: 'Sales & POS',
     icon: 'Receipt',
     path: '/sales',
-    enabled: false,
-    badge: 'Coming Soon',
-    roles: [USER_ROLES.ADMIN, USER_ROLES.CASHIER, USER_ROLES.PHARMACIST],
+    enabled: true,
+    roles: [USER_ROLES.ADMIN, USER_ROLES.PHARMACIST, USER_ROLES.CASHIER, USER_ROLES.INVENTORY_MANAGER],
   },
   {
     id: 'customers',
@@ -436,6 +435,42 @@ export const PAYMENT_TERMS_CONFIGS = {
   net_45: 'Net 45 Days',
   net_60: 'Net 60 Days',
 };
+
+// Sales & Billing Status Configurations
+export const SALE_STATUS_CONFIGS = {
+  completed: {
+    label: 'Completed',
+    color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    color: 'text-rose-700 bg-rose-50 border-rose-200',
+  },
+};
+
+export const PAYMENT_STATUS_CONFIGS = {
+  paid: {
+    label: 'Paid',
+    color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+  },
+  partially_paid: {
+    label: 'Partially Paid',
+    color: 'text-amber-800 bg-amber-50 border-amber-300',
+  },
+  unpaid: {
+    label: 'Unpaid',
+    color: 'text-rose-700 bg-rose-50 border-rose-200',
+  },
+};
+
+export const PAYMENT_METHOD_CONFIGS = {
+  cash: { label: 'Cash', icon: 'Banknote' },
+  card: { label: 'Debit / Credit Card', icon: 'CreditCard' },
+  upi: { label: 'UPI / QR Code', icon: 'Smartphone' },
+  bank_transfer: { label: 'Bank Transfer', icon: 'Building' },
+  other: { label: 'Other', icon: 'Wallet' },
+};
+
 
 
 

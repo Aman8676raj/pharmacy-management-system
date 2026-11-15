@@ -3,6 +3,7 @@
 ## Phase 2: Medicine Management
 ## Phase 3: Inventory Management (Batch Tracking, FEFO & Audit Movements)
 ## Phase 4: Supplier & Purchase Management (Procurement, Receiving & Inventory Integration)
+## Phase 5: Sales, Point of Sale (POS), Billing & Invoice Generation (FEFO Stock Deduction, PDFKit Invoices & Audit Logs)
 
 A modern, full-stack Pharmacy Management System built with **React.js (Vite)**, **Node.js**, **Express.js**, and **MongoDB (Mongoose)**. 
 
@@ -10,7 +11,8 @@ PharmaCore delivers a clean, professional SaaS dashboard designed specifically f
 - **Phase 1** established the architectural foundation with JWT `HttpOnly` cookie authentication and role-based access control.
 - **Phase 2** implemented an enterprise-grade **Medicine Management** module with full CRUD operations, live MongoDB data integration, pagination, multi-field search, category and manufacturer filtering, soft deactivation, and real-time dashboard analytics.
 - **Phase 3** implemented complete **Inventory Management** featuring batch-wise stock intake, audit movement history, FEFO (First Expiry, First Out) dispatch preview, low-stock threshold alerts, automated expiry status transitions, and quarantine/release workflows.
-- **Phase 4** implements complete **Supplier & Purchase Order Management** featuring vendor registration, GST compliance tracking, multi-item purchase orders with automatic backend total calculation, partial/full delivery receiving, automatic inventory batch creation/replenishment via `inventoryService`, immutable `stock_in` transaction logging, and real-time procurement KPIs on the main dashboard.
+- **Phase 4** implemented complete **Supplier & Purchase Order Management** featuring vendor registration, GST compliance tracking, multi-item purchase orders with automatic backend total calculation, partial/full delivery receiving, automatic inventory batch creation/replenishment via `inventoryService`, immutable `stock_in` transaction logging, and real-time procurement KPIs on the main dashboard.
+- **Phase 5** implements a comprehensive **Sales, Point of Sale (POS), Billing & Tax Invoice Generation** module featuring high-speed product catalog browsing, cart operations with line/order discounts and GST, automated First Expiry First Out (FEFO) stock deduction with immutable `stock_out` audit transactions, multi-payment support (Cash, Card, UPI, Bank Transfer), partial payment tracking, Admin-only sale cancellation with automatic batch stock restoration via `return_in` transactions, professional server-side PDF tax invoice generation via **PDFKit**, Cashier isolation, and live dashboard integration for Today's Sales, sales trends, and recent transactions.
 
 ---
 
@@ -308,25 +310,43 @@ All responses conform to the standard JSON envelope:
 | `POST` | `/api/purchases/:id/receive` | Admin, Inventory Mgr | Receive partial or complete delivery into active inventory |
 | `PATCH` | `/api/purchases/:id/cancel` | Admin, Inventory Mgr | Cancel draft or unfulfilled ordered PO |
 
+### Sales, POS & Billing Endpoints (`/api/sales`)
+
+| Method | Endpoint | Authorization | Functionality |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/sales` | Admin, Pharmacist, Cashier | Create POS sale with automatic FEFO stock deduction and optional payment |
+| `GET` | `/api/sales` | Admin, Pharmacist, Cashier, Inventory Mgr | Paginated sales listing (Cashier isolated to own sales; Admin/Pharmacist view all) |
+| `GET` | `/api/sales/stats` | Admin, Pharmacist, Cashier, Inventory Mgr | Real-time sales statistics (today's revenue, overall revenue, AOV, daily trend) |
+| `GET` | `/api/sales/:id` | Admin, Pharmacist, Cashier, Inventory Mgr | Complete invoice details, line items, batch allocations, and payment log |
+| `GET` | `/api/sales/invoice/:invoiceNumber` | Admin, Pharmacist, Cashier, Inventory Mgr | Lookup sale by sequential invoice number |
+| `GET` | `/api/sales/:id/invoice` | Admin, Pharmacist, Cashier, Inventory Mgr | Stream & download official PDF tax invoice generated with PDFKit |
+| `POST` | `/api/sales/:id/payments` | Admin, Pharmacist, Cashier | Record subsequent balance payments for partially paid or unpaid invoices |
+| `PATCH` | `/api/sales/:id/cancel` | Admin Only | Cancel completed sale, restore stock to original batches with `return_in` logs |
+| `GET` | `/api/sales/:id/profit` | Admin, Pharmacist | Gross profit and margin analysis based on batch purchase cost |
+
 ---
 
-## 6. Purchase and Inventory Integration
+## 6. Inventory Integration: Procurement & FEFO Sales Dispatch
 
-The delivery intake workflow seamlessly connects purchase orders with Phase 3 inventory:
-1. When stock arrives, authorized staff submit delivery details via `POST /api/purchases/:id/receive`.
-2. Validates batch number, positive quantity received, and verifies that the expiry date is strictly in the future.
-3. Automatically delegates to `inventoryService.stockIn()`.
-4. Creates or replenishes the `MedicineBatch` in active inventory.
-5. Records an immutable `InventoryTransaction` of type `stock_in` referencing the supplier invoice and PO number.
-6. Increments the PO item's `receivedQuantity`.
-7. If all line items are fulfilled, transitions PO status to `received` with timestamp; otherwise marks as `partially_received`.
-8. Records an entry in `receivingHistory` showing which batches and quantities were received and by whom.
+The inventory system seamlessly connects supply intake with Point-of-Sale dispensing:
+1. **Stock Intake & Receiving**: When purchase deliveries arrive, `POST /api/purchases/:id/receive` validates batches and calls `inventoryService.stockIn()`, recording immutable `stock_in` transaction records.
+2. **FEFO Stock Deduction**: When checkout occurs in the POS terminal, `salesService.createSale()` invokes `inventoryService.deductFEFO()`:
+   - Identifies active, non-expired, non-quarantined batches with `availableQuantity > 0`, ordered by `expiryDate: 1`.
+   - Decrements stock from earliest-expiring lots first.
+   - Automatically marks batches as `depleted` when available stock reaches 0.
+   - Creates an immutable `stock_out` `InventoryTransaction` per batch allocation with previous and new quantities.
+   - Safeguarded against midway failures: automatically rolls back any deducted stock if an item fails validation.
+3. **Admin Cancellation & Stock Restoration**: When an invoice is cancelled via `PATCH /api/sales/:id/cancel`:
+   - Admin-only privilege requiring a mandatory reason.
+   - Loops through each allocated batch and restores the exact quantities via `inventoryService.restoreBatchStock()`.
+   - Reactivates batches if they were previously depleted.
+   - Records immutable `return_in` `InventoryTransaction` records with audit references.
 
 ---
 
 ## 7. Automated Testing
 
-Run the full system verification suite covering all **71 scenarios**:
+Run the full system verification suite covering all **90 scenarios**:
 ```bash
 cd backend
 npm test
@@ -341,8 +361,26 @@ npm test
   - Supplier registration, duplicate code/GST rejection, active/inactive filtering, soft deactivation, blocking inactive suppliers from receiving POs.
   - Multi-item PO creation, backend financial calculations, draft vs ordered state transitions, preventing modification of ordered POs.
   - Full vs partial stock deliveries, status updates (`partially_received` -> `received`), automatic inventory batch creation, immutable `stock_in` transaction logging.
-  - Over-receiving rejection, expired batch rejection, cancellation rules (draft and unfulfilled orders allowed; partially and fully received orders blocked).
-  - Multi-role permission checks (Cashier 403 on purchases, Pharmacist 403 on intake, unauthenticated 401).
+  - Over-receiving rejection, expired batch rejection, cancellation rules.
+- **Phase 5: Sales, POS & Billing Management (19 Scenarios)**:
+  - Health check verification of version 5.0.0 and Phase 5 status.
+  - Initial batch stock-in and second batch stock-in with earlier expiry date to test FEFO lot selection.
+  - Pharmacist POS checkout verifying sequential invoice number generation and earliest-expiring batch prioritization.
+  - Verification of immutable `stock_out` inventory audit transactions created upon checkout.
+  - Cashier checkout with item-level discounts, order-level discount, GST calculations, and partial payment handling.
+  - Cashier privacy isolation: cashiers can only view their own sales records.
+  - Admin visibility across all staff sales transactions.
+  - Subsequent payment recording to settle outstanding balances with automatic status update to `paid`.
+  - Inventory Manager restricted from POS sales checkout (403 Forbidden).
+  - Unauthenticated request rejection (401).
+  - Protection against selling more than available stock (400) without inventory corruption.
+  - Cashier restricted from cancelling sales (403 Forbidden).
+  - Admin-only sale cancellation with mandatory reason, restoring stock to batches via `return_in` transactions.
+  - Prevention of duplicate cancellations and payment recording on cancelled invoices.
+  - Single sale retrieval by ID and by invoice number with payments history.
+  - Aggregate sales statistics endpoint (`/api/sales/stats`) with 7-day daily trend.
+  - Profit analytics endpoint (`/api/sales/:id/profit`) reporting COGS and gross margins.
+  - PDFKit binary stream verification (`%PDF-` magic header) for tax invoice downloads.
 
 **Test Execution Result:**
 ```
@@ -355,8 +393,10 @@ npm test
     TEST RESULTS: 23 PASSED, 0 FAILED
 >>> Running Phase 4: Supplier & Purchase Management Suite...
     TEST RESULTS: 32 PASSED, 0 FAILED
+>>> Running Phase 5: Sales, POS & Billing Suite...
+    TEST RESULTS: 19 PASSED, 0 FAILED
 ====================================================
-  TOTAL TEST RESULTS: 71 PASSED, 0 FAILED (100% Pass Rate)
+  TOTAL TEST RESULTS: 90 PASSED, 0 FAILED (100% Pass Rate)
 ====================================================
 ```
 
@@ -364,12 +404,12 @@ npm test
 
 ## 8. Dashboard Live Data Integration
 
-The PharmaCore **Dashboard** connects directly to live MongoDB metrics across Phases 1, 2, 3, and 4:
+The PharmaCore **Dashboard** connects directly to live MongoDB metrics across Phases 1 through 5:
 - **Total Active Medicines Card**: Live database count of active formulary items.
 - **Low Stock Medicines Card**: Live count of medicines whose sellable stock is below the minimum threshold.
-- **Active Suppliers Card**: Live count of active registered pharmaceutical vendors and operating hubs.
-- **Purchase Orders Card**: Live count of total purchase orders, pending deliveries, and lifetime procurement spend.
+- **Today's Sales Revenue Card**: Real-time revenue and completed bill count processed today.
+- **Total Sales Revenue Card**: Lifetime gross revenue and completed sales invoices in MongoDB.
 - **Low Stock Alert Preview**: Live list of deficit medications with real-time stock-to-threshold progress bars and quick restock actions.
 - **Expiring Batches Preview**: Live list of batches expiring within the 90-day window with days-remaining urgency indicators.
-- **Recently Added Medicines**: Live formulary table linking to full medication profiles.
-- **Future Previews**: Point-of-Sale billing and Customer directories remain clearly designated as Phase 5 previews.
+- **Sales Overview Chart**: Area chart wired directly to MongoDB daily sales revenue and transaction volumes.
+- **Recent Transactions Table**: Live billing transactions feed with clickable invoice details links and payment status indicators.

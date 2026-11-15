@@ -30,6 +30,11 @@ import CreatePurchasePage from './pages/purchases/CreatePurchasePage';
 import EditPurchasePage from './pages/purchases/EditPurchasePage';
 import PurchaseDetailsPage from './pages/purchases/PurchaseDetailsPage';
 
+// Phase 5: Sales & POS Pages
+import SalesListPage from './pages/sales/SalesListPage';
+import POSPage from './pages/sales/POSPage';
+import SaleDetailsPage from './pages/sales/SaleDetailsPage';
+
 function App() {
   return (
     <BrowserRouter>
@@ -145,6 +150,26 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Sales, POS & Billing (Phase 5) */}
+            <Route path="/sales" element={<SalesListPage />} />
+            <Route
+              path="/sales/pos"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist', 'cashier']}>
+                  <POSPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pos"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist', 'cashier']}>
+                  <POSPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/sales/:id" element={<SaleDetailsPage />} />
           </Route>
 
           {/* Fallback Root & Unknown Routes */}

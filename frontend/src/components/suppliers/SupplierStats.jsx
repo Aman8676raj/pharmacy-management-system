@@ -58,3 +58,4 @@ export default function SupplierStats({ stats = null, loading = false }) {
     </div>
   );
 }
+

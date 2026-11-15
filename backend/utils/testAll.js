@@ -9,6 +9,7 @@ const tests = [
   { name: 'Phase 2: Medicine Management Suite', script: 'testMedicines.js' },
   { name: 'Phase 3: Inventory Management Suite', script: 'testInventory.js' },
   { name: 'Phase 4: Supplier & Purchase Management Suite', script: 'testPurchases.js' },
+  { name: 'Phase 5: Sales, POS & Billing Suite', script: 'testSales.js' },
 ];
 
 let allPassed = true;

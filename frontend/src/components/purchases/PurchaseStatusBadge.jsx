@@ -14,3 +14,4 @@ export default function PurchaseStatusBadge({ status, size = 'sm' }) {
     </Badge>
   );
 }
+

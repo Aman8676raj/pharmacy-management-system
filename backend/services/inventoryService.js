@@ -782,6 +782,153 @@ class InventoryService {
       allocations,
     };
   }
+
+  /**
+   * Deduct stock using First Expiry, First Out (FEFO) strategy and record stock_out transactions
+   */
+  async deductFEFO(medicineId, requestedQuantity, reason, reference, userId) {
+    if (!mongoose.Types.ObjectId.isValid(medicineId)) {
+      const error = new Error('Invalid medicine ID format.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const reqQty = parseFloat(requestedQuantity);
+    if (isNaN(reqQty) || reqQty <= 0) {
+      const error = new Error('Deduction quantity must be greater than zero.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    await this.autoUpdateExpiredBatches();
+
+    const medicine = await Medicine.findById(medicineId);
+    if (!medicine) {
+      const error = new Error('Medicine not found.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (!medicine.isActive) {
+      const error = new Error(`Cannot sell inactive medicine (${medicine.name}).`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const now = new Date();
+    const eligibleBatches = await MedicineBatch.find({
+      medicine: medicineId,
+      status: 'active',
+      expiryDate: { $gte: now },
+      availableQuantity: { $gt: 0 },
+    }).sort({ expiryDate: 1 });
+
+    const totalAvailable = eligibleBatches.reduce((acc, b) => acc + b.availableQuantity, 0);
+
+    if (totalAvailable < reqQty) {
+      const error = new Error(
+        `Insufficient sellable stock for ${medicine.name}. Requested: ${reqQty}, Available: ${totalAvailable}`
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    let remainingToAllocate = reqQty;
+    const allocations = [];
+
+    for (const batch of eligibleBatches) {
+      if (remainingToAllocate <= 0) break;
+
+      const allocateFromBatch = Math.min(batch.availableQuantity, remainingToAllocate);
+      remainingToAllocate -= allocateFromBatch;
+
+      const previousQuantity = batch.availableQuantity;
+      const newQuantity = previousQuantity - allocateFromBatch;
+
+      batch.availableQuantity = newQuantity;
+      if (newQuantity === 0) {
+        batch.status = 'depleted';
+      }
+
+      await batch.save();
+
+      // Record immutable stock_out transaction
+      await InventoryTransaction.create({
+        medicine: medicineId,
+        batch: batch._id,
+        transactionType: 'stock_out',
+        quantity: allocateFromBatch,
+        previousQuantity,
+        newQuantity,
+        reason: reason || 'POS Sale stock deduction',
+        reference: reference || 'POS-SALE',
+        performedBy: userId,
+      });
+
+      allocations.push({
+        batch: batch._id,
+        batchNumber: batch.batchNumber,
+        expiryDate: batch.expiryDate,
+        quantity: allocateFromBatch,
+        unitPrice: batch.sellingPrice,
+        unitCost: batch.purchasePrice,
+      });
+    }
+
+    return allocations;
+  }
+
+  /**
+   * Restore batch stock upon sale cancellation and record return_in transaction
+   */
+  async restoreBatchStock(batchId, quantity, reason, reference, userId) {
+    if (!mongoose.Types.ObjectId.isValid(batchId)) {
+      const error = new Error('Invalid batch ID format.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const restQty = parseFloat(quantity);
+    if (isNaN(restQty) || restQty <= 0) {
+      const error = new Error('Restoration quantity must be greater than zero.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const batch = await MedicineBatch.findById(batchId);
+    if (!batch) {
+      const error = new Error('Batch record not found.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const previousQuantity = batch.availableQuantity;
+    const newQuantity = previousQuantity + restQty;
+    batch.availableQuantity = newQuantity;
+
+    const now = new Date();
+    if (new Date(batch.expiryDate) < now) {
+      batch.status = 'expired';
+    } else {
+      batch.status = 'active';
+    }
+
+    await batch.save();
+
+    const transaction = await InventoryTransaction.create({
+      medicine: batch.medicine,
+      batch: batch._id,
+      transactionType: 'return_in',
+      quantity: restQty,
+      previousQuantity,
+      newQuantity,
+      reason: reason || 'Sale cancellation - stock returned',
+      reference: reference || 'SALE-CANCEL',
+      performedBy: userId,
+    });
+
+    return { batch, transaction };
+  }
 }
 
 module.exports = new InventoryService();

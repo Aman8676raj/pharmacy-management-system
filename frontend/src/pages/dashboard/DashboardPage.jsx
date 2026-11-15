@@ -11,6 +11,8 @@ import {
   Database,
   ShoppingCart,
   Boxes,
+  Receipt,
+  IndianRupee,
 } from 'lucide-react';
 import StatCard from '../../components/dashboard/StatCard';
 import SalesOverviewChart from '../../components/dashboard/SalesOverviewChart';
@@ -24,6 +26,7 @@ import medicineService from '../../services/medicineService';
 import inventoryService from '../../services/inventoryService';
 import supplierService from '../../services/supplierService';
 import purchaseService from '../../services/purchaseService';
+import salesService from '../../services/salesService';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -33,6 +36,8 @@ export default function DashboardPage() {
   const [liveInventorySummary, setLiveInventorySummary] = useState(null);
   const [liveSupplierStats, setLiveSupplierStats] = useState(null);
   const [livePurchaseStats, setLivePurchaseStats] = useState(null);
+  const [liveSaleStats, setLiveSaleStats] = useState(null);
+  const [liveRecentSales, setLiveRecentSales] = useState([]);
   const [liveLowStock, setLiveLowStock] = useState([]);
   const [liveExpiring, setLiveExpiring] = useState([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
@@ -47,13 +52,15 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [medsRes, invSummaryRes, lowRes, expRes, supRes, poRes] = await Promise.allSettled([
+        const [medsRes, invSummaryRes, lowRes, expRes, supRes, poRes, salesStatsRes, salesListRes] = await Promise.allSettled([
           medicineService.getMedicineStats(),
           inventoryService.getInventorySummary(),
           inventoryService.getLowStockMedicines(),
           inventoryService.getExpiringBatches(90),
           supplierService.getSupplierStats(),
           purchaseService.getPurchaseStats(),
+          salesService.getSaleStats(),
+          salesService.getSales({ limit: 5 }),
         ]);
 
         if (medsRes.status === 'fulfilled' && medsRes.value.success) {
@@ -74,6 +81,12 @@ export default function DashboardPage() {
         if (poRes.status === 'fulfilled' && poRes.value.success) {
           setLivePurchaseStats(poRes.value.data);
         }
+        if (salesStatsRes.status === 'fulfilled' && salesStatsRes.value.success) {
+          setLiveSaleStats(salesStatsRes.value.data);
+        }
+        if (salesListRes.status === 'fulfilled' && salesListRes.value.success) {
+          setLiveRecentSales(salesListRes.value.data?.sales || []);
+        }
       } catch (err) {
         console.error('Error fetching dashboard live data:', err);
       } finally {
@@ -92,7 +105,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-200 border border-teal-400/30 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-teal-300" />
-              Phase 4: Supplier &amp; Purchase Management Active
+              Phase 5: Sales, POS &amp; Billing Active
             </span>
             <span className="text-xs text-teal-200/80 flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
@@ -108,7 +121,7 @@ export default function DashboardPage() {
             <strong className="text-white">
               {ROLE_LABELS[user?.role] || user?.role}
             </strong>
-            . Live MongoDB formulary catalog, batch tracking, FEFO dispatch, vendor directory, and procurement workflows are fully operational.
+            . Live MongoDB formulary catalog, batch tracking, FEFO dispatch, vendor directory, and POS point-of-sale checkout with tax invoices are fully operational.
           </p>
         </div>
 
@@ -129,7 +142,7 @@ export default function DashboardPage() {
       <div className="bg-teal-50/70 border border-teal-200/80 rounded-xl px-4 py-3 flex items-start gap-3 text-xs text-teal-950">
         <Database className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" />
         <div className="leading-relaxed">
-          <span className="font-semibold text-teal-900">Database Integration Active:</span> <strong>Total Medicines</strong>, <strong>Low Stock Thresholds</strong>, <strong>Active Suppliers</strong>, and <strong>Purchase Orders &amp; Deliveries</strong> are connected live to MongoDB records (Phases 1-4). Point-of-Sale billing and Customer directories remain curated previews for Phase 5.
+          <span className="font-semibold text-teal-900">Database Integration Active:</span> <strong>Total Medicines</strong>, <strong>Low Stock Thresholds</strong>, <strong>Active Suppliers</strong>, <strong>Purchase Orders</strong>, and <strong>Point of Sale (POS) Billing &amp; Invoices</strong> are connected live to MongoDB records (Phases 1-5).
         </div>
       </div>
 
@@ -193,27 +206,27 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Total Suppliers (LIVE MONGODB DATA - PHASE 4) */}
+        {/* Today's Sales (LIVE MONGODB DATA - PHASE 5) */}
         <div className="relative">
           <StatCard
-            title="Active Suppliers"
+            title="Today's Sales Revenue"
             value={
               isLoadingStats
                 ? 'Loading...'
-                : `${liveSupplierStats?.active ?? 0}`
+                : `₹${Number(liveSaleStats?.today?.revenue || 0).toFixed(2)}`
             }
             change={
               isLoadingStats
                 ? '...'
-                : `${liveSupplierStats?.totalCities ?? 0} Operating Cities`
+                : `${liveSaleStats?.today?.count || 0} Bills Today`
             }
             trend="up"
             detail={
-              liveSupplierStats
-                ? `${liveSupplierStats.total} total vendors registered`
-                : 'Live vendor directory'
+              liveSaleStats
+                ? `${liveSaleStats.statusCounts?.paid || 0} fully paid bills`
+                : 'Live billing metrics'
             }
-            icon={Truck}
+            icon={Receipt}
             accentColor="purple"
           />
           <div className="absolute top-2.5 right-2.5">
@@ -223,27 +236,27 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Purchase Orders (LIVE MONGODB DATA - PHASE 4) */}
+        {/* Lifetime Revenue (LIVE MONGODB DATA - PHASE 5) */}
         <div className="relative">
           <StatCard
-            title="Purchase Orders"
+            title="Total Sales Revenue"
             value={
               isLoadingStats
                 ? 'Loading...'
-                : `${livePurchaseStats?.totalOrders ?? 0}`
+                : `₹${Number(liveSaleStats?.overall?.totalRevenue || 0).toFixed(2)}`
             }
             change={
               isLoadingStats
                 ? '...'
-                : `${livePurchaseStats?.pendingOrders ?? 0} Pending Deliveries`
+                : `${liveSaleStats?.overall?.totalSales || 0} Invoices`
             }
-            trend={livePurchaseStats?.pendingOrders > 0 ? 'warning' : 'up'}
+            trend="up"
             detail={
-              livePurchaseStats
-                ? `$${livePurchaseStats.totalPurchaseValue?.toFixed(2)} lifetime spend`
+              liveSaleStats
+                ? `₹${Number(liveSaleStats.overall?.totalGrossProfit || 0).toFixed(2)} gross profit`
                 : 'Procurement metrics'
             }
-            icon={ShoppingCart}
+            icon={IndianRupee}
             accentColor="blue"
           />
           <div className="absolute top-2.5 right-2.5">
@@ -350,14 +363,14 @@ export default function DashboardPage() {
         <ExpiringMedicinesPreview items={liveExpiring} isLive={true} />
       </div>
 
-      {/* Sales Overview Chart (Sample Data for Phase 5) */}
+      {/* Sales Overview Chart (Live MongoDB Data & Daily Trend) */}
       <div className="grid grid-cols-1 gap-6">
-        <SalesOverviewChart />
+        <SalesOverviewChart liveTrend={liveSaleStats?.dailyTrend} />
       </div>
 
-      {/* Recent Transactions Table (Sample Data for Phase 5) */}
+      {/* Recent Transactions Table (Live MongoDB Data) */}
       <div className="grid grid-cols-1">
-        <RecentTransactionsTable />
+        <RecentTransactionsTable liveSales={liveRecentSales} />
       </div>
     </div>
   );
