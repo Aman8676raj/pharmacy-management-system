@@ -124,7 +124,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-200 border border-teal-400/30 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-teal-300" />
-              PharmaCore v8.0 Production System
+              Pharmacy Overview
             </span>
             <span className="text-xs text-teal-200/80 flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
@@ -140,35 +140,22 @@ export default function DashboardPage() {
             <strong className="text-white">
               {ROLE_LABELS[user?.role] || user?.role}
             </strong>
-            . All 8 modules are fully operational: Medicines Formulary, FEFO Inventory, Vendors, Purchases, POS &amp; Invoices, Patients, Prescriptions, and Executive Business Intelligence.
+            . Comprehensive overview of medicines formulary, inventory stock, sales billing, customer prescriptions, and procurement.
           </p>
         </div>
 
-        <div className="shrink-0 flex sm:flex-col items-start sm:items-end gap-2">
-          <div className="text-left sm:text-right">
-            <span className="text-[11px] uppercase tracking-wider text-teal-300 block font-semibold">
-              Database Connection
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-xs text-emerald-300 font-medium bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-500/30 mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              MongoDB Connected (Port 5000)
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Notice differentiating live data vs placeholders */}
-      <div className="bg-teal-50/70 border border-teal-200/80 rounded-xl px-4 py-3 flex items-start gap-3 text-xs text-teal-950">
-        <Database className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" />
-        <div className="leading-relaxed">
-          <span className="font-semibold text-teal-900">Live Database Integration:</span> <strong>Total Formulary Medicines</strong>, <strong>FEFO Inventory Batches</strong>, <strong>Suppliers</strong>, <strong>Purchase Orders</strong>, <strong>POS Sales &amp; Billing</strong>, <strong>Patient Records</strong>, and <strong>Doctor Prescriptions</strong> are synced in real-time with MongoDB.
+        <div className="shrink-0 flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 text-xs text-emerald-300 font-medium bg-emerald-950/60 px-3 py-1.5 rounded-full border border-emerald-500/30">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            System Active
+          </span>
         </div>
       </div>
 
       {/* 4 Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Medicines (LIVE MONGODB DATA) */}
-        <div className="relative">
+        {/* Total Medicines */}
+        <div>
           <StatCard
             title="Total Active Medicines"
             value={
@@ -184,21 +171,16 @@ export default function DashboardPage() {
             trend="up"
             detail={
               liveMedicineStats
-                ? `${liveMedicineStats.totalInactive} deactivated in database`
-                : 'Live database count'
+                ? `${liveMedicineStats.totalInactive} deactivated in formulary`
+                : 'Formulary items'
             }
             icon={Pill}
             accentColor="teal"
           />
-          <div className="absolute top-2.5 right-2.5">
-            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
-              Live DB
-            </span>
-          </div>
         </div>
 
-        {/* Low Stock Medicines (LIVE MONGODB DATA) */}
-        <div className="relative">
+        {/* Low Stock Medicines */}
+        <div>
           <StatCard
             title="Low Stock Medicines"
             value={
@@ -214,19 +196,14 @@ export default function DashboardPage() {
             trend={
               liveInventorySummary?.lowStockMedicineCount > 0 ? 'warning' : 'up'
             }
-            detail="Below minimum threshold in live DB"
+            detail="Items below safety threshold"
             icon={AlertTriangle}
             accentColor="amber"
           />
-          <div className="absolute top-2.5 right-2.5">
-            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
-              Live DB
-            </span>
-          </div>
         </div>
 
-        {/* Today's Sales (LIVE MONGODB DATA - PHASE 5) */}
-        <div className="relative">
+        {/* Today's Sales */}
+        <div>
           <StatCard
             title="Today's Sales Revenue"
             value={
@@ -243,20 +220,15 @@ export default function DashboardPage() {
             detail={
               liveSaleStats
                 ? `${liveSaleStats.statusCounts?.paid || 0} fully paid bills`
-                : 'Live billing metrics'
+                : 'Completed bills'
             }
             icon={Receipt}
             accentColor="purple"
           />
-          <div className="absolute top-2.5 right-2.5">
-            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
-              Live DB
-            </span>
-          </div>
         </div>
 
-        {/* Lifetime Revenue (LIVE MONGODB DATA - PHASE 5) */}
-        <div className="relative">
+        {/* Lifetime Revenue */}
+        <div>
           <StatCard
             title="Total Sales Revenue"
             value={
@@ -273,16 +245,11 @@ export default function DashboardPage() {
             detail={
               liveSaleStats
                 ? `₹${Number(liveSaleStats.overall?.totalGrossProfit || 0).toFixed(2)} gross profit`
-                : 'Procurement metrics'
+                : 'Lifetime sales'
             }
             icon={IndianRupee}
             accentColor="blue"
           />
-          <div className="absolute top-2.5 right-2.5">
-            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
-              Live DB
-            </span>
-          </div>
         </div>
       </div>
 
@@ -294,14 +261,9 @@ export default function DashboardPage() {
               <Pill className="w-4 h-4" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-slate-900">
-                  Recently Added Medicines
-                </h3>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Live MongoDB Records
-                </span>
-              </div>
+              <h3 className="text-base font-semibold text-slate-900">
+                Recently Added Medicines
+              </h3>
               <p className="text-xs text-slate-500">
                 Latest pharmaceutical formulations added to the master formulary
               </p>
@@ -382,12 +344,12 @@ export default function DashboardPage() {
         <ExpiringMedicinesPreview items={liveExpiring} isLive={true} />
       </div>
 
-      {/* Sales Overview Chart (Live MongoDB Data & Daily Trend) */}
+      {/* Sales Overview Chart */}
       <div className="grid grid-cols-1 gap-6">
         <SalesOverviewChart liveTrend={liveSaleStats?.dailyTrend} />
       </div>
 
-      {/* Recent Transactions Table (Live MongoDB Data) */}
+      {/* Recent Transactions Table */}
       <div className="grid grid-cols-1">
         <RecentTransactionsTable liveSales={liveRecentSales} />
       </div>

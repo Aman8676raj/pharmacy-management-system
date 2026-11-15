@@ -98,7 +98,7 @@ export const MainLayout = () => {
       <Modal
         isOpen={isRoleModalOpen}
         onClose={() => setIsRoleModalOpen(false)}
-        title="Role-Based Access Foundation (Phase 1)"
+        title="Role-Based Access Control (RBAC) Permissions"
         maxWidth="max-w-2xl"
         footer={
           <Button variant="outline" size="sm" onClick={() => setIsRoleModalOpen(false)}>
@@ -108,7 +108,7 @@ export const MainLayout = () => {
       >
         <div className="space-y-4 text-xs">
           <p className="text-slate-600 leading-relaxed">
-            In <strong>Phase 1</strong>, the role and route protection foundation is established. 
+            Role-based permissions and route protections are enforced across the pharmacy system. 
             Your current logged-in role is{' '}
             <span
               className={`font-semibold px-2 py-0.5 rounded-full border ${

@@ -103,9 +103,8 @@ export const NAVIGATION_ITEMS = [
     label: 'Settings',
     icon: 'Settings',
     path: '/settings',
-    enabled: false,
-    badge: 'Coming Soon',
-    roles: [USER_ROLES.ADMIN],
+    enabled: true,
+    roles: [USER_ROLES.ADMIN, USER_ROLES.PHARMACIST, USER_ROLES.INVENTORY_MANAGER, USER_ROLES.CASHIER],
   },
 ];
 

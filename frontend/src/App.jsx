@@ -55,6 +55,9 @@ import ProfitLossReportPage from './pages/reports/ProfitLossReportPage';
 import MedicinePerformancePage from './pages/reports/MedicinePerformancePage';
 import CustomerReportPage from './pages/reports/CustomerReportPage';
 
+// Settings Page
+import SettingsPage from './pages/settings/SettingsPage';
+
 function App() {
   return (
     <BrowserRouter>
@@ -291,6 +294,16 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'pharmacist']}>
                   <CustomerReportPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* System Settings */}
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist', 'inventory_manager', 'cashier']}>
+                  <SettingsPage />
                 </ProtectedRoute>
               }
             />

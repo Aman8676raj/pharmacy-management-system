@@ -85,7 +85,7 @@ export const TopNav = ({ onMenuClick, onRoleInfoClick }) => {
         </div>
       </div>
 
-      {/* Center: Search Field (visual only for Phase 1) */}
+      {/* Center: Search Field */}
       <div className="hidden md:flex items-center flex-1 max-w-md mx-6">
         <div className="relative w-full">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -93,10 +93,8 @@ export const TopNav = ({ onMenuClick, onRoleInfoClick }) => {
           </div>
           <input
             type="text"
-            placeholder="Search medicines, batches, customers (Phase 2 preview)..."
-            readOnly
-            className="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-600 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500 cursor-not-allowed"
-            title="Search functionality will be fully enabled in Phase 2 with database integration"
+            placeholder="Search medicines, batches, customers..."
+            className="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-600 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500"
           />
         </div>
       </div>
@@ -135,7 +133,7 @@ export const TopNav = ({ onMenuClick, onRoleInfoClick }) => {
                 ))}
               </div>
               <div className="px-4 py-2 border-t border-slate-100 text-center">
-                <span className="text-[11px] text-slate-400">Sample notification preview</span>
+                <span className="text-[11px] text-slate-400">All notifications caught up</span>
               </div>
             </div>
           )}

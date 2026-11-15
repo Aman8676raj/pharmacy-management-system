@@ -29,7 +29,7 @@ export const AuthLayout = () => {
       </div>
 
       <footer className="mt-8 text-center text-xs text-slate-400">
-        <p>© 2026 {APP_NAME} • Secure Pharmacy Administration Portal • Phase 1</p>
+        <p>© 2026 {APP_NAME} • Secure Pharmacy Administration Portal</p>
       </footer>
     </div>
   );

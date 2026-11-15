@@ -60,15 +60,6 @@ export const SalesOverviewChart = ({ liveTrend = null }) => {
             <h3 className="text-base font-semibold text-slate-900">
               Sales Revenue Overview
             </h3>
-            {hasLiveData ? (
-              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
-                Live MongoDB
-              </span>
-            ) : (
-              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                Sample Data
-              </span>
-            )}
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             Total for period:{' '}

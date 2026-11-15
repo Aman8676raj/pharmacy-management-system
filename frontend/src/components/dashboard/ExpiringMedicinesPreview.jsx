@@ -23,15 +23,6 @@ export const ExpiringMedicinesPreview = ({ items = null, isLive = false }) => {
           <h3 className="text-base font-semibold text-slate-900">
             Expiring Batches
           </h3>
-          <span
-            className={`text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded ${
-              isLive
-                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                : 'bg-slate-100 text-slate-600 border border-slate-200'
-            }`}
-          >
-            {isLive ? 'Live DB' : 'Sample Data'}
-          </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-500 font-medium">Within 90 Days</span>

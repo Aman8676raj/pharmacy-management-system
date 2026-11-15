@@ -258,7 +258,7 @@ export default function ReceiveStockModal({
         <div className="text-xs text-slate-500 bg-teal-50/70 border border-teal-200/80 p-3 rounded-xl flex items-start gap-2 text-teal-950">
           <PackageCheck className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
           <div>
-            <strong>Phase 3 Inventory Integration:</strong> Confirming this receipt will automatically create or replenish the corresponding batches in active inventory and record an auditable <code className="font-mono font-bold text-teal-900">stock_in</code> transaction.
+            <strong>Automated Inventory Integration:</strong> Confirming this receipt will automatically create or replenish the corresponding batches in active inventory and record an auditable <code className="font-mono font-bold text-teal-900">stock_in</code> transaction.
           </div>
         </div>
 

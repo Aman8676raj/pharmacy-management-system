@@ -65,7 +65,7 @@ export const Sidebar = ({ isOpen, onClose, onRoleInfoClick }) => {
                   {APP_NAME}
                 </span>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200">
-                  Phase 1
+                  v1.0
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 font-medium leading-none">
@@ -152,7 +152,7 @@ export const Sidebar = ({ isOpen, onClose, onRoleInfoClick }) => {
               <div
                 key={item.id}
                 className="flex items-center justify-between px-3 py-2 rounded-lg text-sm text-slate-400 cursor-not-allowed select-none transition-colors opacity-75 hover:bg-slate-50/50"
-                title={`${item.label} module is planned for Phase 2+`}
+                title={`${item.label} module`}
               >
                 <div className="flex items-center gap-3">
                   <IconComponent className="w-4 h-4 text-slate-300 shrink-0" />
