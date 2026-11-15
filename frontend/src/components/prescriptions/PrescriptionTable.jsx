@@ -163,3 +163,4 @@ export const PrescriptionTable = ({
     </div>
   );
 };
+

@@ -266,3 +266,4 @@ export const CustomerSelectModal = ({ isOpen, onClose, onSelectCustomer }) => {
     </Modal>
   );
 };
+

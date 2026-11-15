@@ -76,10 +76,17 @@ export default function DashboardPage() {
           setLiveInventorySummary(invSummaryRes.value.data);
         }
         if (lowRes.status === 'fulfilled' && lowRes.value.success) {
-          setLiveLowStock(lowRes.value.data?.medicines || lowRes.value.data || []);
+          const list =
+            lowRes.value.data?.lowStockMedicines ||
+            lowRes.value.data?.medicines ||
+            (Array.isArray(lowRes.value.data) ? lowRes.value.data : []);
+          setLiveLowStock(list);
         }
         if (expRes.status === 'fulfilled' && expRes.value.success) {
-          setLiveExpiring(expRes.value.data?.batches || expRes.value.data || []);
+          const list =
+            expRes.value.data?.batches ||
+            (Array.isArray(expRes.value.data) ? expRes.value.data : []);
+          setLiveExpiring(list);
         }
         if (supRes.status === 'fulfilled' && supRes.value.success) {
           setLiveSupplierStats(supRes.value.data);

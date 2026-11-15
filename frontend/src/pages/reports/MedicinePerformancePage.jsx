@@ -224,3 +224,4 @@ export const MedicinePerformancePage = () => {
 };
 
 export default MedicinePerformancePage;
+

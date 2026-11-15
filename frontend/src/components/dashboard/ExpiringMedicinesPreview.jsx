@@ -5,7 +5,13 @@ import Badge from '../common/Badge';
 import { Clock, ArrowRight } from 'lucide-react';
 
 export const ExpiringMedicinesPreview = ({ items = null, isLive = false }) => {
-  const displayItems = items !== null ? items : SAMPLE_DASHBOARD_DATA.expiringItems;
+  const displayItems = Array.isArray(items)
+    ? items
+    : Array.isArray(items?.batches)
+    ? items.batches
+    : Array.isArray(SAMPLE_DASHBOARD_DATA?.expiringItems)
+    ? SAMPLE_DASHBOARD_DATA.expiringItems
+    : [];
 
   return (
     <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden flex flex-col">

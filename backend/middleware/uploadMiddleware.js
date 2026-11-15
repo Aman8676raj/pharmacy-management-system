@@ -47,3 +47,4 @@ module.exports = {
   uploadPrescription: upload.single('prescriptionFile'),
   uploadDir,
 };
+

@@ -152,3 +152,4 @@ export const VerifyPrescriptionModal = ({ isOpen, onClose, prescription, onSucce
     </Modal>
   );
 };
+

@@ -94,3 +94,4 @@ customerSchema.index({ createdAt: -1 });
 const Customer = mongoose.model('Customer', customerSchema);
 
 module.exports = Customer;
+

@@ -102,3 +102,4 @@ class PrescriptionController {
 }
 
 module.exports = new PrescriptionController();
+

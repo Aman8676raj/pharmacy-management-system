@@ -30,3 +30,4 @@ export const PrescriptionStatusBadge = ({ status = 'pending', size = 'md' }) => 
       );
   }
 };
+

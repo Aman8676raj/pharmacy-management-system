@@ -142,3 +142,4 @@ prescriptionSchema.index({ createdAt: -1 });
 const Prescription = mongoose.model('Prescription', prescriptionSchema);
 
 module.exports = Prescription;
+

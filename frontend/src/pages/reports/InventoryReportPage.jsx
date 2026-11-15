@@ -269,3 +269,4 @@ export const InventoryReportPage = () => {
 };
 
 export default InventoryReportPage;
+

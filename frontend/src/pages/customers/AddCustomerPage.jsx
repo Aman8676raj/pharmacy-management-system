@@ -231,3 +231,4 @@ export const AddCustomerPage = () => {
 };
 
 export default AddCustomerPage;
+

@@ -5,7 +5,15 @@ import Badge from '../common/Badge';
 import { AlertCircle, ArrowRight } from 'lucide-react';
 
 export const LowStockPreview = ({ items = null, isLive = false }) => {
-  const displayItems = items !== null ? items : SAMPLE_DASHBOARD_DATA.lowStockItems;
+  const displayItems = Array.isArray(items)
+    ? items
+    : Array.isArray(items?.lowStockMedicines)
+    ? items.lowStockMedicines
+    : Array.isArray(items?.medicines)
+    ? items.medicines
+    : Array.isArray(SAMPLE_DASHBOARD_DATA?.lowStockItems)
+    ? SAMPLE_DASHBOARD_DATA.lowStockItems
+    : [];
 
   return (
     <div className="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden flex flex-col">

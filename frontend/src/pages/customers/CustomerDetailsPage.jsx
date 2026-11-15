@@ -424,3 +424,4 @@ export const CustomerDetailsPage = () => {
 };
 
 export default CustomerDetailsPage;
+
