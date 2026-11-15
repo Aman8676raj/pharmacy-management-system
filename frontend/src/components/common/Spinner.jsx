@@ -19,3 +19,4 @@ export const Spinner = ({ size = 'md', className = '', color = 'text-teal-600' }
 };
 
 export default Spinner;
+

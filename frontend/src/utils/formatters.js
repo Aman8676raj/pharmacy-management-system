@@ -48,3 +48,4 @@ export const getInitials = (name) => {
     .join('')
     .toUpperCase();
 };
+

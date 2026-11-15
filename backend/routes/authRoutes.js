@@ -78,3 +78,4 @@ router.post('/logout', authController.logout);
 router.get('/setup-status', authController.getSetupStatus);
 
 module.exports = router;
+

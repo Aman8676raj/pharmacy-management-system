@@ -63,3 +63,4 @@ export const RecentTransactionsTable = () => {
 };
 
 export default RecentTransactionsTable;
+

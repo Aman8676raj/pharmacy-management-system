@@ -183,3 +183,4 @@ export const Sidebar = ({ isOpen, onClose, onRoleInfoClick }) => {
 };
 
 export default Sidebar;
+

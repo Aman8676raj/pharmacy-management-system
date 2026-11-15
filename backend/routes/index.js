@@ -1,5 +1,6 @@
 const express = require('express');
 const authRoutes = require('./authRoutes');
+const medicineRoutes = require('./medicineRoutes');
 
 const router = express.Router();
 
@@ -9,12 +10,13 @@ router.get('/health', (req, res) => {
     success: true,
     message: 'Pharmacy Management API is operational',
     timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    phase: 'Phase 1 - Project Foundation',
+    version: '2.0.0',
+    phase: 'Phase 2 - Medicine Management',
   });
 });
 
 // Mount sub-routes
 router.use('/auth', authRoutes);
+router.use('/medicines', medicineRoutes);
 
 module.exports = router;

@@ -59,3 +59,4 @@ export const PublicRoute = ({ children }) => {
 };
 
 export default ProtectedRoute;
+

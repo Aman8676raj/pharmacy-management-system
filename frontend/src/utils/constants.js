@@ -24,7 +24,7 @@ export const ROLE_COLORS = {
 };
 
 // Navigation items specification
-// Phase 1: Only Dashboard is functional. Others are Coming Soon / disabled.
+// Phase 2: Dashboard and Medicines modules are fully operational.
 export const NAVIGATION_ITEMS = [
   {
     id: 'dashboard',
@@ -39,9 +39,8 @@ export const NAVIGATION_ITEMS = [
     label: 'Medicines',
     icon: 'Pill',
     path: '/medicines',
-    enabled: false,
-    badge: 'Coming Soon',
-    roles: [USER_ROLES.ADMIN, USER_ROLES.PHARMACIST, USER_ROLES.INVENTORY_MANAGER],
+    enabled: true,
+    roles: [USER_ROLES.ADMIN, USER_ROLES.PHARMACIST, USER_ROLES.INVENTORY_MANAGER, USER_ROLES.CASHIER],
   },
   {
     id: 'inventory',
@@ -289,3 +288,54 @@ export const SAMPLE_DASHBOARD_DATA = {
     },
   ],
 };
+
+// Supported Dosage Forms
+export const DOSAGE_FORMS = [
+  'Tablet',
+  'Capsule',
+  'Syrup',
+  'Suspension',
+  'Injection',
+  'Cream',
+  'Ointment',
+  'Gel',
+  'Drops',
+  'Inhaler',
+  'Powder',
+  'Suppository',
+  'Lotion',
+  'Spray',
+  'Patch',
+  'Other',
+];
+
+// Supported Packaging Units
+export const PACKAGE_UNITS = [
+  'Strip',
+  'Bottle',
+  'Box',
+  'Piece',
+  'Tube',
+  'Vial',
+  'Ampoule',
+  'Sachet',
+  'Pack',
+  'Other',
+];
+
+// Common Therapeutic Categories
+export const COMMON_CATEGORIES = [
+  'Analgesics',
+  'Antibiotics',
+  'Antidiabetic',
+  'Antihistamines',
+  'Cardiovascular',
+  'Dermatology',
+  'Gastrointestinal',
+  'Ophthalmic',
+  'Respiratory',
+  'Vitamins & Supplements',
+  'Other',
+];
+
+

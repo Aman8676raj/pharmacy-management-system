@@ -76,3 +76,4 @@ export const LowStockPreview = () => {
 };
 
 export default LowStockPreview;
+

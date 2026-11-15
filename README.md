@@ -1,9 +1,10 @@
 # PharmaCore - Pharmacy Management System (PMS)
 ## Phase 1: Project Foundation & Authentication
+## Phase 2: Medicine Management
 
 A modern, full-stack Pharmacy Management System built with **React.js (Vite)**, **Node.js**, **Express.js**, and **MongoDB (Mongoose)**. 
 
-PharmaCore delivers a clean, professional SaaS dashboard designed specifically for pharmacy administration. Phase 1 provides a robust architectural foundation with JWT HttpOnly cookie authentication, role-based access control (RBAC), protected routing, and an interactive analytics dashboard.
+PharmaCore delivers a clean, professional SaaS dashboard designed specifically for single-pharmacy administration. Phase 1 provides the architectural foundation with JWT `HttpOnly` cookie authentication and role-based access control. Phase 2 implements a complete, enterprise-grade **Medicine Management** module with full CRUD operations, live MongoDB data integration, pagination, multi-field search, category and manufacturer filtering, soft deactivation, and real-time dashboard analytics.
 
 ---
 
@@ -37,136 +38,189 @@ PharmaCore delivers a clean, professional SaaS dashboard designed specifically f
 ```
 PMS/
 ├── .gitignore
-├── package.json               # Root convenience scripts
-├── README.md
+├── package.json                         # Root convenience scripts
+├── README.md                            # Comprehensive project documentation
 ├── backend/
-│   ├── .env                   # Environment variables (excluded from git)
-│   ├── .env.example           # Example environment template
-│   ├── package.json           # Backend dependencies and scripts
-│   ├── app.js                 # Express application & middleware setup
-│   ├── server.js              # Server entry point & DB connection
+│   ├── .env                             # Environment configuration (git-ignored)
+│   ├── .env.example                     # Environment template
+│   ├── package.json                     # Backend dependencies, dev & test scripts
+│   ├── server.js                        # Server entry point & DB startup
+│   ├── app.js                           # Express application & middleware setup
 │   ├── config/
-│   │   └── db.js              # Mongoose MongoDB connection handler
+│   │   └── db.js                        # Mongoose MongoDB connection handler
 │   ├── controllers/
-│   │   └── authController.js  # Controller for login, register, me, logout
+│   │   ├── authController.js            # Controller for login, register, me, logout
+│   │   └── medicineController.js        # Controller for medicine CRUD, search & stats
 │   ├── middleware/
-│   │   ├── authMiddleware.js  # protect & authorize (RBAC) middlewares
-│   │   ├── errorMiddleware.js # Centralized 404 & global error handlers
-│   │   └── validateMiddleware.js # express-validator error formatter
+│   │   ├── authMiddleware.js            # protect & authorize (RBAC) middlewares
+│   │   ├── errorMiddleware.js           # Centralized 404 & global error handlers
+│   │   └── validateMiddleware.js        # express-validator result formatter
 │   ├── models/
-│   │   └── User.js            # Mongoose User model with safe serialization
+│   │   ├── Medicine.js                  # Mongoose Medicine model with indexes
+│   │   └── User.js                      # Mongoose User model with safe serialization
 │   ├── routes/
-│   │   ├── authRoutes.js      # Auth endpoint definitions & validations
-│   │   └── index.js           # API route root & health check
+│   │   ├── authRoutes.js                # Auth endpoint definitions & validations
+│   │   ├── medicineRoutes.js            # Medicine endpoint definitions & validations
+│   │   └── index.js                     # Root API router & health check
 │   ├── services/
-│   │   └── authService.js     # Business logic & user management
+│   │   ├── authService.js               # User & authentication business logic
+│   │   └── medicineService.js           # Medicine catalog & search business logic
 │   ├── uploads/
-│   │   └── .gitkeep           # Uploads directory
+│   │   └── .gitkeep                     # Directory for file uploads
 │   └── utils/
-│       ├── apiResponse.js     # Standardized JSON response helper
-│       ├── generateToken.js   # JWT signing & HttpOnly cookie utility
-│       ├── logger.js          # Application request logger
-│       └── seed.js            # Database seeder for demo accounts
+│       ├── apiResponse.js               # Standardized JSON response helpers
+│       ├── generateToken.js             # JWT signing & HttpOnly cookie utility
+│       ├── logger.js                    # Request/event logger
+│       ├── seed.js                      # Database seeder for demo accounts & medicines
+│       └── testMedicines.js             # Automated 16-scenario test runner
 └── frontend/
-    ├── .env                   # Frontend environment configuration
-    ├── .env.example           # Example frontend environment template
-    ├── index.html             # Vite HTML entry point
-    ├── package.json           # Frontend dependencies & build scripts
-    ├── postcss.config.js      # PostCSS configuration
-    ├── tailwind.config.js     # Tailwind CSS theme & typography configuration
-    ├── vite.config.js         # Vite configuration with proxy / host settings
+    ├── .env                             # Frontend environment configuration
+    ├── .env.example                     # Frontend environment template
+    ├── index.html                       # Vite HTML entry point
+    ├── package.json                     # Frontend dependencies & build scripts
+    ├── postcss.config.js                # PostCSS configuration
+    ├── tailwind.config.js               # Tailwind theme & color configurations
+    ├── vite.config.js                   # Vite configuration
     └── src/
-        ├── App.jsx            # Routing and application root
-        ├── main.jsx           # React DOM root entry
-        ├── index.css          # Tailwind base & custom scrollbar directives
-        ├── assets/            # Static assets
+        ├── App.jsx                      # Router & ProtectedRoute hierarchy
+        ├── main.jsx                     # React DOM entry point
+        ├── index.css                    # Tailwind directives & custom scrollbars
+        ├── assets/                      # Static assets
         ├── components/
         │   ├── common/
-        │   │   ├── Alert.jsx         # Status alert messages
-        │   │   ├── Badge.jsx         # Semantic status & role badges
-        │   │   ├── Button.jsx        # Buttons with variants and spinners
-        │   │   ├── Card.jsx          # Styled SaaS containers
-        │   │   ├── Input.jsx         # Inputs with icons and password toggle
-        │   │   ├── Modal.jsx         # Accessible modal dialog
-        │   │   ├── ProtectedRoute.jsx# Auth guard & redirect wrapper
-        │   │   └── Spinner.jsx       # Loading indicator
+        │   │   ├── Alert.jsx            # Alert banner component
+        │   │   ├── Badge.jsx            # Semantic role & status badges
+        │   │   ├── Button.jsx           # Button with spinner & variants
+        │   │   ├── Card.jsx             # Card container
+        │   │   ├── Input.jsx            # Form input with icons & password toggle
+        │   │   ├── Modal.jsx            # Accessible modal dialog
+        │   │   ├── ProtectedRoute.jsx   # Route guard & public route wrapper
+        │   │   └── Spinner.jsx          # Circular loading spinner
         │   ├── dashboard/
         │   │   ├── ExpiringMedicinesPreview.jsx # Batch expiry preview
         │   │   ├── LowStockPreview.jsx          # Stock threshold alerts
-        │   │   ├── RecentTransactionsTable.jsx  # POS transactions table
+        │   │   ├── RecentTransactionsTable.jsx  # Recent sales POS table
         │   │   ├── SalesOverviewChart.jsx       # Recharts revenue area chart
         │   │   └── StatCard.jsx                 # Summary metric card
-        │   └── layout/
-        │       ├── Sidebar.jsx       # Responsive navigation drawer
-        │       └── TopNav.jsx        # Breadcrumb, search, notifs, profile
+        │   ├── layout/
+        │   │   ├── Sidebar.jsx          # Responsive navigation sidebar
+        │   │   └── TopNav.jsx           # Top navbar with breadcrumb & profile
+        │   └── medicines/
+        │       ├── MedicineDetailsModal.jsx # Quick view preview modal
+        │       ├── MedicineFilters.jsx  # Search, category, manufacturer & status filters
+        │       ├── MedicineForm.jsx     # Multi-section medicine creation/edit form
+        │       ├── MedicineStats.jsx    # Metric cards for active/inactive/Rx counts
+        │       └── MedicineTable.jsx    # Responsive data table with pagination & actions
         ├── context/
-        │   └── AuthContext.jsx       # React context for auth state & user session
+        │   └── AuthContext.jsx          # React context for auth session state
         ├── hooks/
         │   └── useAuth.js            # Custom auth hook
         ├── layouts/
-        │   ├── AuthLayout.jsx        # Clean layout for sign-in
+        │   ├── AuthLayout.jsx        # Clean authentication page layout
         │   └── MainLayout.jsx        # Admin dashboard shell with navigation
         ├── pages/
         │   ├── auth/
-        │   │   └── LoginPage.jsx     # Login page with demo role quick-fill
-        │   └── dashboard/
-        │       └── DashboardPage.jsx # Pharmacy analytics & operational view
+        │   │   └── LoginPage.jsx        # Login page with demo role quick-fill
+        │   ├── dashboard/
+        │   │   └── DashboardPage.jsx    # Real-time analytics & recently added medicines
+        │   └── medicines/
+        │       ├── AddMedicinePage.jsx      # Medicine registration form
+        │       ├── EditMedicinePage.jsx     # Medicine update form
+        │       ├── MedicineDetailsPage.jsx  # Structured clinical profile view
+        │       └── MedicineListPage.jsx     # Master catalog table with filters
         ├── services/
         │   ├── api.js                # Axios client with credentials & interceptors
-        │   └── authService.js        # Auth API client functions
+        │   ├── authService.js        # Auth API client
+        │   └── medicineService.js    # Medicine API client
         └── utils/
-            ├── constants.js          # Navigation list, roles, sample mock data
+            ├── constants.js          # Navigation list, roles, sample mock data, dosage forms
             └── formatters.js         # Currency, date, and name helpers
 ```
 
 ---
 
-## 3. Installation and Execution
+## 3. Medicine Data Model
 
-### Prerequisites
-- **Node.js**: v18.0.0 or higher (v22+ tested)
-- **npm**: v9.0.0 or higher
-- **MongoDB**: Community Server running locally on `mongodb://127.0.0.1:27017`
+The Mongoose Medicine model (`backend/models/Medicine.js`) contains:
 
-### Step 1: Clone or Open Project
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | String | Trade / Medicine name (required, max 120 chars) |
+| `genericName` | String | Active pharmaceutical entity / international nonproprietary name |
+| `brandName` | String | Commercial brand name |
+| `category` | String | Therapeutic category (required, e.g. Antibiotics, Analgesics) |
+| `manufacturer` | String | Manufacturing laboratory / pharmaceutical supplier |
+| `description` | String | Clinical indications and precautions (max 1000 chars) |
+| `composition` | String | Detailed chemical composition (e.g. Paracetamol 500mg, Caffeine 30mg) |
+| `dosageForm` | String | Dosage form (Tablet, Capsule, Syrup, Injection, Cream, Drops, Inhaler, etc.) |
+| `strength` | String | Formulation strength (e.g. 500mg, 250mg/5ml, 1%) |
+| `packSize` | String | Packaging presentation (e.g. 10x10 Tablets, 100ml Bottle) |
+| `unit` | String | Dispensing unit (Strip, Bottle, Box, Piece, Tube, Vial, Ampoule, etc.) |
+| `barcode` | String | Unique barcode (EAN / UPC / Code 128) - sparse indexed |
+| `sku` | String | Unique SKU identifier (required, uppercase, indexed) |
+| `requiresPrescription` | Boolean | Doctor prescription requirement flag (Rx vs OTC) |
+| `minimumStock` | Number | Low-stock alert threshold (min: 0, default: 10) |
+| `isActive` | Boolean | Soft-deletion flag (default: true) |
+| `createdBy` | ObjectId | Reference to `User` model who created the record |
+| `timestamps` | Date | `createdAt` and `updatedAt` managed automatically by Mongoose |
+
+---
+
+## 4. Role-Based Access Control (RBAC)
+
+The Medicine Management module enforces strict role-based permissions:
+
+| Role | View & Search | Add Medicine | Edit Medicine | Deactivate (Soft Delete) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Administrator** | ✅ Full Access | ✅ Allowed | ✅ Allowed | ✅ Allowed |
+| **Pharmacist** | ✅ Full Access | ✅ Allowed | ✅ Allowed | ❌ Restricted |
+| **Inventory Manager**| ✅ Full Access | ✅ Allowed | ✅ Allowed | ❌ Restricted |
+| **Cashier** | ✅ View & Search | ❌ Restricted | ❌ Restricted | ❌ Restricted |
+
+*Note: Cashier accounts can browse, search, and view complete details of medications, but creation, editing, and deactivation buttons are hidden on the UI and strictly rejected with `403 Forbidden` on the backend APIs.*
+
+---
+
+## 5. API Reference
+
+All responses use the standard JSON response format:
+```json
+{
+  "success": true,
+  "message": "Human readable status",
+  "data": { ... }
+}
+```
+
+### Medicine Endpoints
+
+| Method | Endpoint | Access Level | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/medicines` | Admin, Pharmacist, Inventory Mgr | Register a new medicine with SKU and barcode validation |
+| `GET` | `/api/medicines` | All Authenticated Staff | Paginated list with search, category, manufacturer, and status filters |
+| `GET` | `/api/medicines/search` | All Authenticated Staff | Fast autocomplete search across name, generic, brand, and SKU |
+| `GET` | `/api/medicines/filter-options` | All Authenticated Staff | Distinct categories, manufacturers, and dosage forms for filters |
+| `GET` | `/api/medicines/stats` | All Authenticated Staff | Real-time counts of active/inactive medicines, categories, and recent records |
+| `GET` | `/api/medicines/:id` | All Authenticated Staff | Complete medicine profile and creator details |
+| `PUT` | `/api/medicines/:id` | Admin, Pharmacist, Inventory Mgr | Update medicine fields with SKU/barcode collision checks |
+| `DELETE` | `/api/medicines/:id` | Admin Only | Soft-delete medicine (`isActive = false`) |
+
+---
+
+## 6. Installation, Seeding & Execution
+
+### Step 1: Install Dependencies
 ```bash
-cd PMS
-```
-
-### Step 2: Configure Environment Variables
-
-**Backend (`backend/.env`):**
-```env
-PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/pharmacy_management
-JWT_SECRET=pharmacy_super_secure_jwt_secret_phase1_2026
-JWT_EXPIRES_IN=7d
-NODE_ENV=development
-CLIENT_URL=http://localhost:5173
-```
-
-**Frontend (`frontend/.env`):**
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
-*(Note: `.env.example` templates are provided in both directories. `.env` files are git-ignored).*
-
-### Step 3: Install Dependencies
-
-```bash
-# Install backend packages
+# Backend dependencies
 cd backend
 npm install
 
-# Install frontend packages
+# Frontend dependencies
 cd ../frontend
 npm install
 ```
 
-### Step 4: Seed Demo Staff Accounts
-
-Run the database seed script to populate demo accounts covering all 4 system roles:
+### Step 2: Seed Database with Demo Accounts and Initial Medicines
 ```bash
 cd backend
 npm run seed
@@ -179,109 +233,67 @@ Output:
   -> Created PHARMACIST: pharmacist@pharmacy.com
   -> Created CASHIER: cashier@pharmacy.com
   -> Created INVENTORY_MANAGER: inventory@pharmacy.com
+[Seed] Seeding initial medicines...
+  -> Seeded Medicine: [MED-PARA-500] Paracetamol 500mg (Analgesics)
+  -> Seeded Medicine: [MED-AMOX-500] Amoxicillin 500mg (Antibiotics)
+  -> Seeded Medicine: [MED-CETI-010] Cetirizine 10mg (Antihistamines)
+  -> Seeded Medicine: [MED-METF-500] Metformin 500mg (Antidiabetic)
+  ...
 [Seed] Seeding completed successfully!
 ```
 
-**Demo Credentials (for all accounts):**
-- Password: `Password@123`
-- Pre-configured accounts:
-  1. **Administrator**: `admin@pharmacy.com`
-  2. **Pharmacist**: `pharmacist@pharmacy.com`
-  3. **Cashier**: `cashier@pharmacy.com`
-  4. **Inventory Manager**: `inventory@pharmacy.com`
-
-*(A quick-fill button is also built directly into the login screen for one-click testing).*
-
-### Step 5: Start the Applications
-
-**Run Backend (Terminal 1):**
+### Step 3: Run the Application
+**Terminal 1 (Backend):**
 ```bash
 cd backend
 npm run dev
-# Starts server with nodemon on http://localhost:5000
+# Server running at http://localhost:5000/api
 ```
 
-**Run Frontend (Terminal 2):**
+**Terminal 2 (Frontend):**
 ```bash
 cd frontend
 npm run dev
-# Starts Vite development server on http://localhost:5173
+# Vite client running at http://localhost:5173
 ```
 
-**Production Build:**
+---
+
+## 7. Automated Testing
+
+Run the automated test runner to verify all 16 Phase 2 scenarios:
 ```bash
-cd frontend
-npm run build
+cd backend
+npm test
 ```
 
----
+### Test Scenarios Verified
 
-## 4. Authentication & Security Architecture
-
-### Authentication Mechanism
-- **JWT Storage**: Tokens are stored strictly in `HttpOnly`, `SameSite` cookies with `secure` flag enabled in production. This eliminates client-side XSS token theft vulnerabilities.
-- **Header Fallback**: The backend also supports `Authorization: Bearer <token>` for API test runners (Postman, curl).
-- **Password Security**: Passwords are salted and hashed using `bcrypt` / `bcryptjs` (cost factor 10) prior to storage.
-- **Data Protection**: Password hashes are set with `{ select: false }` on the Mongoose schema and stripped via `.toSafeObject()` and `.toJSON()` transforms. No password or hash is ever leaked in API responses.
-- **Session Hydration**: On application mount, `AuthContext` calls `GET /api/auth/me` to safely verify the session cookie.
-- **Remember-Me**: The "Remember my email" feature only remembers the user's email string in local storage—never passwords or tokens.
-
-### Role-Based Access Control (RBAC)
-Four primary pharmacy roles are established:
-| Role | Access Scope |
-| :--- | :--- |
-| `admin` | Full system access across all operational, financial, and configuration modules |
-| `pharmacist` | Operational access to medicine dispensing, inventory status, and prescriptions |
-| `cashier` | Billing-related access, POS checkouts, customer invoices, and daily registers |
-| `inventory_manager` | Warehouse stock control, purchase orders, supplier coordination, and batch tracking |
-
-### Registration Restriction
-- `POST /api/auth/register` prevents public self-registration.
-- If the database contains **zero users**, the initial setup of the first administrator account is permitted.
-- Once users exist, registration is strictly restricted to authenticated users holding the `admin` role.
+| # | Scenario | Verification | Result |
+|---|:---|:---|:---:|
+| 1 | Admin adds a medicine successfully | Status 201, medicine object returned | **PASS** |
+| 2 | Pharmacist adds a medicine successfully | Status 201, medicine created | **PASS** |
+| 3 | Cashier cannot add medicines | Status 403 Forbidden | **PASS** |
+| 4 | Duplicate SKU is rejected | Status 400 Bad Request, conflict error | **PASS** |
+| 5 | Duplicate barcode is rejected | Status 400 Bad Request, barcode error | **PASS** |
+| 6 | Medicine listing works | Status 200, array of medicines and pagination | **PASS** |
+| 7 | Search works with partial names | Status 200, query 'para' finds Paracetamol | **PASS** |
+| 8 | Category filtering works | Status 200, category 'Antibiotics' matches | **PASS** |
+| 9 | Manufacturer filtering works | Status 200, manufacturer 'Pfizer' matches | **PASS** |
+| 10 | Pagination works | Status 200, page=1&limit=2 returns 2 items | **PASS** |
+| 11 | Medicine details load correctly | Status 200, populated creator details | **PASS** |
+| 12 | Medicine updates work | Status 200, updated fields reflected | **PASS** |
+| 13 | Medicine deactivation works | Status 200, sets `isActive = false` | **PASS** |
+| 14 | Inactive medicines excluded by default | Status 200, normal listing omits deactivated | **PASS** |
+| 15 | Unauthenticated requests are rejected | Status 401 Unauthorized | **PASS** |
+| 16 | Invalid medicine IDs return errors | Status 400 for bad ID, 404 for non-existent | **PASS** |
 
 ---
 
-## 5. API Reference
+## 8. Dashboard Live Data Integration
 
-All responses use a standardized JSON envelope:
-```json
-{
-  "success": true,
-  "message": "Human readable status",
-  "data": { ... }
-}
-```
-
-### Endpoints Implemented
-
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/health` | Public | System and API health check |
-| `POST` | `/api/auth/login` | Public | Authenticates credentials and sets HttpOnly JWT cookie |
-| `POST` | `/api/auth/logout` | Public / Private | Clears HttpOnly cookie |
-| `GET` | `/api/auth/me` | Protected | Returns authenticated user profile |
-| `POST` | `/api/auth/register` | Restricted | Admin or initial setup only; creates new staff account |
-| `GET` | `/api/auth/setup-status` | Public | Checks if system requires initial admin setup |
-
----
-
-## 6. Frontend Features & Design System
-
-- **Clean SaaS Aesthetic**: Light-gray (`bg-slate-50`) background, deep navy typography (`text-slate-900`), and subtle teal/blue accent colors.
-- **Sidebar Navigation**:
-  - `Dashboard`: Fully functional.
-  - `Medicines`, `Inventory`, `Suppliers`, `Purchases`, `Sales & Billing`, `Customers`, `Prescriptions`, `Reports`, `Settings`: Visually present with clear "Coming Soon" badges and non-functional states for Phase 1.
-  - `Sign Out`: Clears session and redirects to `/login`.
-- **Top Navigation Bar**:
-  - Breadcrumbs & Page title.
-  - Search field (visual preview for Phase 2).
-  - Notification icon with sample alert items dropdown.
-  - User profile dropdown showing avatar, name, email, role badge, and role access modal trigger.
-- **Interactive Dashboard**:
-  - **4 Stat Cards**: Total Medicines, Today's Sales, Low Stock Medicines, Total Suppliers.
-  - **Sales Overview Chart**: Rendered with Recharts AreaChart with smooth gradient fills and Weekly/Monthly toggles.
-  - **Recent Transactions Table**: Professional responsive table with status pills.
-  - **Low Stock Preview**: Visual progress indicators and urgency badges.
-  - **Expiring Medicines Preview**: Batch-level expiration tracking with warning badges.
-  - **Explicit Sample Data Notice**: Clear visual banner informing the reviewer that dashboard metrics are mock samples for Phase 1 visual validation.
+In Phase 2, the **Dashboard** is directly connected to MongoDB:
+- **Total Medicines Card**: Connects to the real database count of active medicines.
+- **Formulary Metrics**: Displays total categories and number of deactivated records.
+- **Recently Added Medicines**: Live table displaying the latest medications registered in MongoDB with direct links to full details.
+- **Phase Separation**: Sales & Billing and Supplier Orders remain clearly identified as Phase 3 / Phase 4 sample previews.

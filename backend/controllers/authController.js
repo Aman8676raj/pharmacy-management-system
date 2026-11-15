@@ -109,3 +109,4 @@ module.exports = {
   logout,
   getSetupStatus,
 };
+

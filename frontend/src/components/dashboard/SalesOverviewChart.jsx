@@ -125,3 +125,4 @@ export const SalesOverviewChart = () => {
 };
 
 export default SalesOverviewChart;
+
