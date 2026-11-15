@@ -18,6 +18,18 @@ import AddStockPage from './pages/inventory/AddStockPage';
 import BatchDetailsPage from './pages/inventory/BatchDetailsPage';
 import StockTransactionsPage from './pages/inventory/StockTransactionsPage';
 
+// Phase 4: Supplier Pages
+import SupplierListPage from './pages/suppliers/SupplierListPage';
+import AddSupplierPage from './pages/suppliers/AddSupplierPage';
+import EditSupplierPage from './pages/suppliers/EditSupplierPage';
+import SupplierDetailsPage from './pages/suppliers/SupplierDetailsPage';
+
+// Phase 4: Purchase Pages
+import PurchaseListPage from './pages/purchases/PurchaseListPage';
+import CreatePurchasePage from './pages/purchases/CreatePurchasePage';
+import EditPurchasePage from './pages/purchases/EditPurchasePage';
+import PurchaseDetailsPage from './pages/purchases/PurchaseDetailsPage';
+
 function App() {
   return (
     <BrowserRouter>
@@ -79,6 +91,60 @@ function App() {
             />
             <Route path="/inventory/batches/:id" element={<BatchDetailsPage />} />
             <Route path="/inventory/transactions" element={<StockTransactionsPage />} />
+
+            {/* Supplier Management (Phase 4) */}
+            <Route path="/suppliers" element={<SupplierListPage />} />
+            <Route
+              path="/suppliers/new"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'inventory_manager']}>
+                  <AddSupplierPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/suppliers/:id" element={<SupplierDetailsPage />} />
+            <Route
+              path="/suppliers/:id/edit"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'inventory_manager']}>
+                  <EditSupplierPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Purchase Order Management (Phase 4) */}
+            <Route
+              path="/purchases"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'inventory_manager', 'pharmacist']}>
+                  <PurchaseListPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/purchases/new"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'inventory_manager']}>
+                  <CreatePurchasePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/purchases/:id"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'inventory_manager', 'pharmacist']}>
+                  <PurchaseDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/purchases/:id/edit"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'inventory_manager']}>
+                  <EditPurchasePage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* Fallback Root & Unknown Routes */}

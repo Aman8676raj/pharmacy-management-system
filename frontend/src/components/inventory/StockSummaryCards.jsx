@@ -121,3 +121,4 @@ export const StockSummaryCards = ({ summary, isLoading = false }) => {
 };
 
 export default StockSummaryCards;
+

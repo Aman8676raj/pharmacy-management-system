@@ -207,3 +207,4 @@ export default function ExpiryAlerts({ batches = [], loading = false, onThreshol
     </div>
   );
 }
+

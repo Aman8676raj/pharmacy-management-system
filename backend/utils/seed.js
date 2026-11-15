@@ -7,6 +7,8 @@ const User = require('../models/User');
 const Medicine = require('../models/Medicine');
 const MedicineBatch = require('../models/MedicineBatch');
 const InventoryTransaction = require('../models/InventoryTransaction');
+const Supplier = require('../models/Supplier');
+const PurchaseOrder = require('../models/PurchaseOrder');
 
 const demoUsers = [
   {
@@ -99,7 +101,7 @@ const initialMedicines = [
     genericName: 'Metformin Hydrochloride',
     brandName: 'Glucophage',
     category: 'Antidiabetic',
-    manufacturer: 'Novartis',
+    manufacturer: 'Merck & Co.',
     description: 'First-line medication for the treatment of type 2 diabetes.',
     composition: 'Metformin HCl 500mg',
     dosageForm: 'Tablet',
@@ -109,16 +111,16 @@ const initialMedicines = [
     barcode: '890103001004',
     sku: 'MED-METF-500',
     requiresPrescription: true,
-    minimumStock: 60, // Minimum is 60, will seed with 15 units to trigger Low Stock!
+    minimumStock: 35,
     isActive: true,
   },
   {
     name: 'Omeprazole 20mg',
-    genericName: 'Omeprazole Magnesium',
+    genericName: 'Omeprazole',
     brandName: 'Prilosec',
     category: 'Gastrointestinal',
     manufacturer: 'AstraZeneca',
-    description: 'Proton pump inhibitor used to treat gastric acid-related diseases.',
+    description: 'Proton-pump inhibitor for gastroesophageal reflux disease and ulcers.',
     composition: 'Omeprazole 20mg',
     dosageForm: 'Capsule',
     strength: '20mg',
@@ -126,22 +128,22 @@ const initialMedicines = [
     unit: 'Strip',
     barcode: '890103001005',
     sku: 'MED-OMEP-020',
-    requiresPrescription: true,
+    requiresPrescription: false,
     minimumStock: 45,
     isActive: true,
   },
   {
     name: 'Salbutamol Inhaler 100mcg',
-    genericName: 'Albuterol Sulfate',
+    genericName: 'Albuterol',
     brandName: 'Ventolin',
     category: 'Respiratory',
-    manufacturer: 'Cipla Ltd.',
-    description: 'Bronchodilator for rapid relief of asthma attacks and bronchospasm.',
-    composition: 'Salbutamol 100mcg per actuation',
+    manufacturer: 'GSK',
+    description: 'Bronchodilator for rapid relief of asthma and bronchospasm attacks.',
+    composition: 'Salbutamol Sulfate 100mcg per actuation',
     dosageForm: 'Inhaler',
     strength: '100mcg',
-    packSize: '200 doses',
-    unit: 'Bottle',
+    packSize: '200 Doses',
+    unit: 'Piece',
     barcode: '890103001006',
     sku: 'MED-SALB-100',
     requiresPrescription: true,
@@ -153,8 +155,8 @@ const initialMedicines = [
     genericName: 'Ibuprofen',
     brandName: 'Advil',
     category: 'Analgesics',
-    manufacturer: 'Abbott Laboratories',
-    description: 'Nonsteroidal anti-inflammatory drug (NSAID) for pain and swelling.',
+    manufacturer: 'Pfizer Inc.',
+    description: 'Nonsteroidal anti-inflammatory drug (NSAID) for fever and pain relief.',
     composition: 'Ibuprofen 400mg',
     dosageForm: 'Tablet',
     strength: '400mg',
@@ -163,20 +165,20 @@ const initialMedicines = [
     barcode: '890103001007',
     sku: 'MED-IBUP-400',
     requiresPrescription: false,
-    minimumStock: 35,
+    minimumStock: 30,
     isActive: true,
   },
   {
     name: 'Azithromycin 250mg',
-    genericName: 'Azithromycin Dihydrate',
+    genericName: 'Azithromycin',
     brandName: 'Zithromax',
     category: 'Antibiotics',
     manufacturer: 'Pfizer Inc.',
-    description: 'Macrolide antibiotic used for respiratory and skin bacterial infections.',
-    composition: 'Azithromycin 250mg',
+    description: 'Macrolide antibiotic used for respiratory, skin, and ear infections.',
+    composition: 'Azithromycin Dihydrate 250mg',
     dosageForm: 'Tablet',
     strength: '250mg',
-    packSize: '6 tablets',
+    packSize: '1x6',
     unit: 'Strip',
     barcode: '890103001008',
     sku: 'MED-AZIT-250',
@@ -186,15 +188,15 @@ const initialMedicines = [
   },
   {
     name: 'Ciprofloxacin Eye Drops 0.3%',
-    genericName: 'Ciprofloxacin',
+    genericName: 'Ciprofloxacin Hydrochloride',
     brandName: 'Ciloxan',
     category: 'Ophthalmic',
-    manufacturer: 'Alcon Laboratories',
-    description: 'Fluoroquinolone antibacterial eye drops for bacterial conjunctivitis.',
+    manufacturer: 'Novartis',
+    description: 'Antibacterial eye drops for treatment of bacterial corneal ulcers.',
     composition: 'Ciprofloxacin 0.3% w/v',
     dosageForm: 'Drops',
-    strength: '0.3% w/v',
-    packSize: '5ml',
+    strength: '0.3%',
+    packSize: '5ml Bottle',
     unit: 'Bottle',
     barcode: '890103001009',
     sku: 'MED-CIPR-003',
@@ -240,6 +242,81 @@ const initialMedicines = [
   },
 ];
 
+const initialSuppliers = [
+  {
+    supplierCode: 'SUP-0001',
+    name: 'Apex Health Distributors',
+    contactPerson: 'Vikram Malhotra',
+    email: 'orders@apexhealth.in',
+    phone: '+91 98201 12345',
+    alternatePhone: '+91 98201 54321',
+    address: '42 Industrial Logistics Hub, Andheri East',
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    postalCode: '400069',
+    country: 'India',
+    gstNumber: '27AABCA1234F1Z1',
+    drugLicenseNumber: 'DL-MH-2024-8841',
+    paymentTerms: 'net_30',
+    notes: 'Primary distributor for analgesics, antibiotics, and surgical supplies.',
+    isActive: true,
+  },
+  {
+    supplierCode: 'SUP-0002',
+    name: 'MedLife Pharma Logistics',
+    contactPerson: 'Ananya Sharma',
+    email: 'supply@medlifepharma.com',
+    phone: '+91 80234 56789',
+    alternatePhone: '',
+    address: 'Plot 18, Electronics City Phase 1',
+    city: 'Bangalore',
+    state: 'Karnataka',
+    postalCode: '560100',
+    country: 'India',
+    gstNumber: '29AABCM5678G1Z2',
+    drugLicenseNumber: 'DL-KA-2023-9932',
+    paymentTerms: 'net_15',
+    notes: 'Cold-chain storage certified distributor. Express 24-hr delivery.',
+    isActive: true,
+  },
+  {
+    supplierCode: 'SUP-0003',
+    name: 'Global BioCare Supplies',
+    contactPerson: 'Rajesh Verma',
+    email: 'info@globalbiocare.org',
+    phone: '+91 11255 67890',
+    alternatePhone: '',
+    address: '88 Okhla Industrial Area, Phase 3',
+    city: 'Delhi',
+    state: 'Delhi',
+    postalCode: '110020',
+    country: 'India',
+    gstNumber: '07AABCG9012H1Z3',
+    drugLicenseNumber: 'DL-DL-2022-7714',
+    paymentTerms: 'net_45',
+    notes: 'Authorized wholesale importer for specialty inhalers and dermatological treatments.',
+    isActive: true,
+  },
+  {
+    supplierCode: 'SUP-0004',
+    name: 'Zenith Diagnostics & Labs',
+    contactPerson: 'Sunil Rao',
+    email: 'contact@zenithdiagnostics.com',
+    phone: '+91 40667 89012',
+    alternatePhone: '',
+    address: 'Banjara Hills Road No. 12',
+    city: 'Hyderabad',
+    state: 'Telangana',
+    postalCode: '500034',
+    country: 'India',
+    gstNumber: '36AABCZ3456J1Z4',
+    drugLicenseNumber: 'DL-TS-2021-6621',
+    paymentTerms: 'net_30',
+    notes: 'Deactivated supplier account for testing soft deactivation behavior.',
+    isActive: false,
+  },
+];
+
 const seedDatabase = async () => {
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/pharmacy_management';
@@ -271,13 +348,121 @@ const seedDatabase = async () => {
       console.log(`  -> Seeded Medicine: [${medData.sku}] ${medData.name}`);
     }
 
-    // 3. Seed initial inventory batches & transactions
+    // 3. Seed initial suppliers
+    console.log('[Seed] Seeding suppliers...');
+    await Supplier.deleteMany({});
+
+    const createdSuppliers = {};
+    for (const supData of initialSuppliers) {
+      const supplier = await Supplier.create({
+        ...supData,
+        createdBy: createdUsers.admin._id,
+      });
+      createdSuppliers[supplier.supplierCode] = supplier;
+      console.log(`  -> Seeded Supplier: [${supplier.supplierCode}] ${supplier.name} (${supplier.isActive ? 'Active' : 'Inactive'})`);
+    }
+
+    // 4. Seed initial purchase orders
+    console.log('[Seed] Seeding purchase orders...');
+    await PurchaseOrder.deleteMany({});
+
+    const po1Items = [
+      {
+        medicine: createdMeds['MED-PARA-500']._id,
+        medicineName: createdMeds['MED-PARA-500'].name,
+        sku: createdMeds['MED-PARA-500'].sku,
+        orderedQuantity: 100,
+        receivedQuantity: 0,
+        unitCost: 2.50,
+        discount: 10,
+        taxRate: 5,
+        taxAmount: 12,
+        lineTotal: 252,
+      },
+      {
+        medicine: createdMeds['MED-AMOX-500']._id,
+        medicineName: createdMeds['MED-AMOX-500'].name,
+        sku: createdMeds['MED-AMOX-500'].sku,
+        orderedQuantity: 50,
+        receivedQuantity: 0,
+        unitCost: 6.00,
+        discount: 0,
+        taxRate: 12,
+        taxAmount: 36,
+        lineTotal: 336,
+      },
+    ];
+
+    const po1 = await PurchaseOrder.create({
+      purchaseOrderNumber: 'PO-2026-0001',
+      supplier: createdSuppliers['SUP-0001']._id,
+      orderDate: new Date(),
+      expectedDeliveryDate: new Date(Date.now() + 7 * 86400000),
+      status: 'ordered',
+      items: po1Items,
+      subtotal: 550,
+      discount: 10,
+      taxAmount: 48,
+      shippingCharges: 25,
+      totalAmount: 613,
+      notes: 'Initial monthly bulk replenishment order.',
+      createdBy: createdUsers.admin._id,
+      updatedBy: createdUsers.admin._id,
+    });
+    console.log(`  -> Seeded Purchase Order: [${po1.purchaseOrderNumber}] (Status: ${po1.status}, Amount: $${po1.totalAmount})`);
+
+    const po2Items = [
+      {
+        medicine: createdMeds['MED-CETI-010']._id,
+        medicineName: createdMeds['MED-CETI-010'].name,
+        sku: createdMeds['MED-CETI-010'].sku,
+        orderedQuantity: 60,
+        receivedQuantity: 60,
+        unitCost: 1.80,
+        discount: 0,
+        taxRate: 5,
+        taxAmount: 5.40,
+        lineTotal: 113.40,
+      },
+      {
+        medicine: createdMeds['MED-METF-500']._id,
+        medicineName: createdMeds['MED-METF-500'].name,
+        sku: createdMeds['MED-METF-500'].sku,
+        orderedQuantity: 40,
+        receivedQuantity: 40,
+        unitCost: 3.20,
+        discount: 5,
+        taxRate: 5,
+        taxAmount: 6.15,
+        lineTotal: 129.15,
+      },
+    ];
+
+    const po2 = await PurchaseOrder.create({
+      purchaseOrderNumber: 'PO-2026-0002',
+      supplier: createdSuppliers['SUP-0002']._id,
+      orderDate: new Date(Date.now() - 14 * 86400000),
+      expectedDeliveryDate: new Date(Date.now() - 7 * 86400000),
+      status: 'received',
+      receivedAt: new Date(Date.now() - 7 * 86400000),
+      items: po2Items,
+      subtotal: 236,
+      discount: 5,
+      taxAmount: 11.55,
+      shippingCharges: 15,
+      totalAmount: 257.55,
+      notes: 'Delivered in full by MedLife logistics.',
+      createdBy: createdUsers.inventory_manager._id,
+      updatedBy: createdUsers.inventory_manager._id,
+    });
+    console.log(`  -> Seeded Purchase Order: [${po2.purchaseOrderNumber}] (Status: ${po2.status}, Amount: $${po2.totalAmount})`);
+
+    // 5. Seed initial inventory batches & transactions
     console.log('[Seed] Seeding inventory batches & transaction logs...');
     await MedicineBatch.deleteMany({});
     await InventoryTransaction.deleteMany({});
 
     const now = new Date();
-
     const addDays = (d, days) => {
       const res = new Date(d);
       res.setDate(res.getDate() + days);
@@ -285,12 +470,11 @@ const seedDatabase = async () => {
     };
 
     const initialBatches = [
-      // Paracetamol Batch 1 (Safe stock, FEFO second)
       {
         medicineSku: 'MED-PARA-500',
         batchNumber: 'BT-PARA-001',
         manufacturingDate: addDays(now, -90),
-        expiryDate: addDays(now, 365), // 1 year
+        expiryDate: addDays(now, 365),
         purchasePrice: 2.50,
         sellingPrice: 4.50,
         quantityReceived: 100,
@@ -298,95 +482,88 @@ const seedDatabase = async () => {
         supplierName: 'Apex Health Distributors',
         status: 'active',
       },
-      // Paracetamol Batch 2 (Expiring in 45 days -> FEFO first, expiring soon!)
       {
         medicineSku: 'MED-PARA-500',
         batchNumber: 'BT-PARA-002',
-        manufacturingDate: addDays(now, -180),
-        expiryDate: addDays(now, 45), // 45 days (Expiring soon)
-        purchasePrice: 2.30,
-        sellingPrice: 4.20,
+        manufacturingDate: addDays(now, -60),
+        expiryDate: addDays(now, 45), // Expiring in 45 days (Urgent)
+        purchasePrice: 2.40,
+        sellingPrice: 4.50,
         quantityReceived: 50,
         availableQuantity: 50,
         supplierName: 'Apex Health Distributors',
         status: 'active',
       },
-      // Amoxicillin Batch (Safe stock)
       {
         medicineSku: 'MED-AMOX-500',
         batchNumber: 'BT-AMOX-101',
-        manufacturingDate: addDays(now, -60),
+        manufacturingDate: addDays(now, -120),
         expiryDate: addDays(now, 240),
-        purchasePrice: 8.50,
-        sellingPrice: 14.00,
+        purchasePrice: 6.00,
+        sellingPrice: 11.00,
         quantityReceived: 80,
         availableQuantity: 80,
-        supplierName: 'Global Pharma Logistics',
+        supplierName: 'Apex Health Distributors',
         status: 'active',
       },
-      // Cetirizine Batch (Safe stock)
       {
         medicineSku: 'MED-CETI-010',
         batchNumber: 'BT-CETI-201',
-        manufacturingDate: addDays(now, -40),
-        expiryDate: addDays(now, 300),
-        purchasePrice: 3.20,
-        sellingPrice: 6.00,
+        manufacturingDate: addDays(now, -45),
+        expiryDate: addDays(now, 500),
+        purchasePrice: 1.80,
+        sellingPrice: 3.50,
         quantityReceived: 60,
         availableQuantity: 60,
-        supplierName: 'MediSupply Co.',
+        supplierName: 'MedLife Pharma Logistics',
         status: 'active',
       },
-      // Metformin Batch (Low Stock trigger: minimumStock is 60, available is only 15)
       {
         medicineSku: 'MED-METF-500',
         batchNumber: 'BT-METF-301',
         manufacturingDate: addDays(now, -100),
-        expiryDate: addDays(now, 150),
-        purchasePrice: 4.00,
-        sellingPrice: 7.50,
-        quantityReceived: 50,
-        availableQuantity: 15, // Low stock deficit!
-        supplierName: 'Novartis Direct',
+        expiryDate: addDays(now, 180),
+        purchasePrice: 3.20,
+        sellingPrice: 6.00,
+        quantityReceived: 40,
+        availableQuantity: 15, // Low stock (total 15 < min 35)
+        supplierName: 'MedLife Pharma Logistics',
         status: 'active',
       },
-      // Omeprazole Batch (Expiring in 18 days -> Urgent Expiring Soon!)
       {
         medicineSku: 'MED-OMEP-020',
         batchNumber: 'BT-OMEP-401',
-        manufacturingDate: addDays(now, -200),
-        expiryDate: addDays(now, 18), // 18 days
-        purchasePrice: 5.50,
-        sellingPrice: 9.90,
+        manufacturingDate: addDays(now, -30),
+        expiryDate: addDays(now, 700),
+        purchasePrice: 4.50,
+        sellingPrice: 8.50,
         quantityReceived: 70,
         availableQuantity: 70,
-        supplierName: 'BioHealth Corp',
+        supplierName: 'Global BioCare Supplies',
         status: 'active',
       },
-      // Salbutamol Inhaler Batch (Quarantined testing)
       {
         medicineSku: 'MED-SALB-100',
         batchNumber: 'BT-SALB-501',
-        manufacturingDate: addDays(now, -50),
-        expiryDate: addDays(now, 180),
+        manufacturingDate: addDays(now, -40),
+        expiryDate: addDays(now, 300),
         purchasePrice: 12.00,
-        sellingPrice: 19.50,
+        sellingPrice: 22.00,
         quantityReceived: 30,
         availableQuantity: 30,
-        supplierName: 'Cipla Respiratory Dist.',
+        supplierName: 'Global BioCare Supplies',
         status: 'quarantined',
       },
-      // Ibuprofen Batch (Expired testing: expired 10 days ago)
       {
         medicineSku: 'MED-IBUP-400',
         batchNumber: 'BT-IBUP-601',
-        manufacturingDate: addDays(now, -380),
-        expiryDate: addDays(now, -10), // Expired!
-        purchasePrice: 1.80,
-        sellingPrice: 3.50,
+        manufacturingDate: addDays(now, -400),
+        expiryDate: addDays(now, -10), // Expired 10 days ago
+        purchasePrice: 2.00,
+        sellingPrice: 4.00,
         quantityReceived: 40,
         availableQuantity: 40,
-        supplierName: 'Abbott Logistics',
+        supplierName: 'Apex Health Distributors',
         status: 'expired',
       },
     ];
@@ -410,7 +587,6 @@ const seedDatabase = async () => {
         createdBy: createdUsers.admin._id,
       });
 
-      // Record initial stock_in transaction
       await InventoryTransaction.create({
         medicine: med._id,
         batch: batch._id,
@@ -424,7 +600,6 @@ const seedDatabase = async () => {
         createdAt: bData.manufacturingDate,
       });
 
-      // If quarantined, log quarantine transaction
       if (bData.status === 'quarantined') {
         await InventoryTransaction.create({
           medicine: med._id,

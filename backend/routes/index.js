@@ -2,6 +2,8 @@ const express = require('express');
 const authRoutes = require('./authRoutes');
 const medicineRoutes = require('./medicineRoutes');
 const inventoryRoutes = require('./inventoryRoutes');
+const supplierRoutes = require('./supplierRoutes');
+const purchaseRoutes = require('./purchaseRoutes');
 
 const router = express.Router();
 
@@ -11,8 +13,8 @@ router.get('/health', (req, res) => {
     success: true,
     message: 'Pharmacy Management API is operational',
     timestamp: new Date().toISOString(),
-    version: '3.0.0',
-    phase: 'Phase 3 - Inventory Management',
+    version: '4.0.0',
+    phase: 'Phase 4 - Supplier & Purchase Management',
   });
 });
 
@@ -20,5 +22,7 @@ router.get('/health', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/medicines', medicineRoutes);
 router.use('/inventory', inventoryRoutes);
+router.use('/suppliers', supplierRoutes);
+router.use('/purchases', purchaseRoutes);
 
 module.exports = router;

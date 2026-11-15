@@ -102,3 +102,4 @@ export const LowStockTable = ({ lowStockItems = [], isLoading = false }) => {
 };
 
 export default LowStockTable;
+

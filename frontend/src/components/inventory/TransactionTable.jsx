@@ -163,3 +163,4 @@ export default function TransactionTable({ transactions = [], loading = false, e
     </div>
   );
 }
+

@@ -55,18 +55,16 @@ export const NAVIGATION_ITEMS = [
     label: 'Suppliers',
     icon: 'Truck',
     path: '/suppliers',
-    enabled: false,
-    badge: 'Coming Soon',
-    roles: [USER_ROLES.ADMIN, USER_ROLES.INVENTORY_MANAGER],
+    enabled: true,
+    roles: [USER_ROLES.ADMIN, USER_ROLES.INVENTORY_MANAGER, USER_ROLES.PHARMACIST, USER_ROLES.CASHIER],
   },
   {
     id: 'purchases',
     label: 'Purchases',
     icon: 'ShoppingCart',
     path: '/purchases',
-    enabled: false,
-    badge: 'Coming Soon',
-    roles: [USER_ROLES.ADMIN, USER_ROLES.INVENTORY_MANAGER],
+    enabled: true,
+    roles: [USER_ROLES.ADMIN, USER_ROLES.INVENTORY_MANAGER, USER_ROLES.PHARMACIST],
   },
   {
     id: 'sales',
@@ -398,6 +396,45 @@ export const TRANSACTION_TYPE_CONFIGS = {
     color: 'text-indigo-700 bg-indigo-50 border-indigo-200',
     sign: '✓',
   },
+};
+
+// Purchase Order Status Configurations
+export const PURCHASE_STATUS_CONFIGS = {
+  draft: {
+    label: 'Draft',
+    badgeVariant: 'neutral',
+    color: 'text-slate-700 bg-slate-100 border-slate-200',
+  },
+  ordered: {
+    label: 'Ordered',
+    badgeVariant: 'info',
+    color: 'text-blue-700 bg-blue-50 border-blue-200',
+  },
+  partially_received: {
+    label: 'Partially Received',
+    badgeVariant: 'warning',
+    color: 'text-amber-800 bg-amber-50 border-amber-300',
+  },
+  received: {
+    label: 'Received',
+    badgeVariant: 'success',
+    color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    badgeVariant: 'danger',
+    color: 'text-rose-700 bg-rose-50 border-rose-200',
+  },
+};
+
+// Supplier Payment Terms Configurations
+export const PAYMENT_TERMS_CONFIGS = {
+  immediate: 'Immediate / Due on Delivery',
+  net_7: 'Net 7 Days',
+  net_15: 'Net 15 Days',
+  net_30: 'Net 30 Days',
+  net_45: 'Net 45 Days',
+  net_60: 'Net 60 Days',
 };
 
 

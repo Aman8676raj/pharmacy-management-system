@@ -21,3 +21,4 @@ export const BatchStatusBadge = ({ status, className = '' }) => {
 };
 
 export default BatchStatusBadge;
+

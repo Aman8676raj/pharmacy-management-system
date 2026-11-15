@@ -668,12 +668,21 @@ class InventoryService {
       }
     }
 
-    // Search by reference or reason
+    // Search by reference, reason, batch number, or medicine
     if (query.search && query.search.trim()) {
       const searchRegex = new RegExp(query.search.trim(), 'i');
+      const [matchingMeds, matchingBatches] = await Promise.all([
+        Medicine.find({ $or: [{ name: searchRegex }, { sku: searchRegex }] }).select('_id').lean(),
+        MedicineBatch.find({ batchNumber: searchRegex }).select('_id').lean(),
+      ]);
+      const medIds = matchingMeds.map((m) => m._id);
+      const batchIds = matchingBatches.map((b) => b._id);
+
       filter.$or = [
         { reference: searchRegex },
         { reason: searchRegex },
+        { medicine: { $in: medIds } },
+        { batch: { $in: batchIds } },
       ];
     }
 
@@ -776,3 +785,4 @@ class InventoryService {
 }
 
 module.exports = new InventoryService();
+

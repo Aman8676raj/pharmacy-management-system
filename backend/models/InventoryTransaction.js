@@ -89,3 +89,4 @@ const InventoryTransaction = mongoose.model('InventoryTransaction', inventoryTra
 
 module.exports = InventoryTransaction;
 module.exports.transactionTypes = transactionTypes;
+
