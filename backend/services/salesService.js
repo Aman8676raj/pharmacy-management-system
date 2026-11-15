@@ -3,6 +3,8 @@ const Sale = require('../models/Sale');
 const SalePayment = require('../models/SalePayment');
 const Medicine = require('../models/Medicine');
 const MedicineBatch = require('../models/MedicineBatch');
+const Customer = require('../models/Customer');
+const Prescription = require('../models/Prescription');
 const inventoryService = require('./inventoryService');
 
 class SalesService {
@@ -52,6 +54,36 @@ class SalesService {
     const processedItems = [];
     const successfulDeductions = []; // For rollback in case of midway failure
 
+    // Verify customer if provided
+    let customerDoc = null;
+    if (data.customer && mongoose.Types.ObjectId.isValid(data.customer)) {
+      customerDoc = await Customer.findById(data.customer);
+    }
+
+    // Verify prescription if provided
+    let verifiedPrescription = null;
+    if (data.prescription && mongoose.Types.ObjectId.isValid(data.prescription)) {
+      const pDoc = await Prescription.findById(data.prescription);
+      if (!pDoc) {
+        const error = new Error('Selected prescription not found.');
+        error.statusCode = 404;
+        throw error;
+      }
+      if (pDoc.status !== 'verified') {
+        const error = new Error(
+          `Prescription ${pDoc.prescriptionNumber} is ${pDoc.status}. Only verified prescriptions can be dispensed.`
+        );
+        error.statusCode = 400;
+        throw error;
+      }
+      if (pDoc.expiryDate && new Date(pDoc.expiryDate) < new Date()) {
+        const error = new Error(`Prescription ${pDoc.prescriptionNumber} has expired.`);
+        error.statusCode = 400;
+        throw error;
+      }
+      verifiedPrescription = pDoc;
+    }
+
     try {
       for (const rawItem of data.items) {
         if (!rawItem.medicine || !mongoose.Types.ObjectId.isValid(rawItem.medicine)) {
@@ -69,6 +101,15 @@ class SalesService {
 
         if (!medicine.isActive) {
           const error = new Error(`Cannot sell inactive medicine: ${medicine.name}`);
+          error.statusCode = 400;
+          throw error;
+        }
+
+        // Check prescription policy if configured
+        if (medicine.requiresPrescription && data.requireVerifiedPrescription && !verifiedPrescription) {
+          const error = new Error(
+            `A verified doctor prescription is required to dispense ${medicine.name} (Schedule H/X).`
+          );
           error.statusCode = 400;
           throw error;
         }
@@ -195,13 +236,24 @@ class SalesService {
     // Create Sale
     const sale = await Sale.create({
       invoiceNumber,
-      customer: data.customer && mongoose.Types.ObjectId.isValid(data.customer) ? data.customer : null,
+      customer: customerDoc
+        ? customerDoc._id
+        : data.customer && mongoose.Types.ObjectId.isValid(data.customer)
+        ? data.customer
+        : null,
+      prescription: verifiedPrescription
+        ? verifiedPrescription._id
+        : data.prescription && mongoose.Types.ObjectId.isValid(data.prescription)
+        ? data.prescription
+        : null,
       customerSnapshot: {
-        name: data.customerSnapshot?.name?.trim() || 'Walk-in Customer',
-        phone: data.customerSnapshot?.phone?.trim() || '',
-        email: data.customerSnapshot?.email?.trim() || '',
-        address: data.customerSnapshot?.address?.trim() || '',
-        prescriptionRef: data.customerSnapshot?.prescriptionRef?.trim() || '',
+        name: data.customerSnapshot?.name?.trim() || customerDoc?.name || 'Walk-in Customer',
+        phone: data.customerSnapshot?.phone?.trim() || customerDoc?.phone || '',
+        email: data.customerSnapshot?.email?.trim() || customerDoc?.email || '',
+        address: data.customerSnapshot?.address?.trim() || customerDoc?.address || '',
+        prescriptionRef: verifiedPrescription
+          ? `${verifiedPrescription.prescriptionNumber} - Dr. ${verifiedPrescription.doctorName}`
+          : data.customerSnapshot?.prescriptionRef?.trim() || '',
       },
       items: processedItems,
       subtotal: Math.round(subtotal * 100) / 100,
@@ -327,6 +379,8 @@ class SalesService {
     const sale = await Sale.findById(id)
       .populate('soldBy', 'name email role')
       .populate('cancelledBy', 'name email role')
+      .populate('customer', 'name phone email customerCode')
+      .populate('prescription', 'prescriptionNumber doctorName status issueDate')
       .populate('items.medicine', 'name genericName brandName sku dosageForm unit category requiresPrescription');
 
     if (!sale) {
@@ -364,6 +418,8 @@ class SalesService {
     })
       .populate('soldBy', 'name email role')
       .populate('cancelledBy', 'name email role')
+      .populate('customer', 'name phone email customerCode')
+      .populate('prescription', 'prescriptionNumber doctorName status issueDate')
       .populate('items.medicine', 'name genericName brandName sku dosageForm unit category');
 
     if (!sale) {
@@ -648,3 +704,4 @@ class SalesService {
 }
 
 module.exports = new SalesService();
+

@@ -151,6 +151,11 @@ const saleSchema = new mongoose.Schema(
       ref: 'Customer',
       default: null,
     },
+    prescription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Prescription',
+      default: null,
+    },
     customerSnapshot: {
       type: customerSnapshotSchema,
       default: () => ({ name: 'Walk-in Customer' }),
@@ -265,6 +270,8 @@ const saleSchema = new mongoose.Schema(
 );
 
 // Indexes
+saleSchema.index({ customer: 1 });
+saleSchema.index({ prescription: 1 });
 saleSchema.index({ soldBy: 1 });
 saleSchema.index({ saleStatus: 1 });
 saleSchema.index({ paymentStatus: 1 });
