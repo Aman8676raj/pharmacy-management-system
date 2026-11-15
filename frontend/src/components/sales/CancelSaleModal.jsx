@@ -108,3 +108,4 @@ export const CancelSaleModal = ({ isOpen, onClose, sale, onSuccess }) => {
     </Modal>
   );
 };
+

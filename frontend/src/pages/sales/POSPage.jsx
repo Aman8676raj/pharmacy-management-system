@@ -589,3 +589,4 @@ export const POSPage = () => {
 };
 
 export default POSPage;
+

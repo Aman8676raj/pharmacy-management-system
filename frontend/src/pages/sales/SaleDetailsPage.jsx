@@ -463,3 +463,4 @@ export const SaleDetailsPage = () => {
 };
 
 export default SaleDetailsPage;
+

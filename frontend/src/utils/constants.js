@@ -79,8 +79,7 @@ export const NAVIGATION_ITEMS = [
     label: 'Customers',
     icon: 'Users',
     path: '/customers',
-    enabled: false,
-    badge: 'Coming Soon',
+    enabled: true,
     roles: [USER_ROLES.ADMIN, USER_ROLES.CASHIER, USER_ROLES.PHARMACIST],
   },
   {
@@ -88,18 +87,16 @@ export const NAVIGATION_ITEMS = [
     label: 'Prescriptions',
     icon: 'FileText',
     path: '/prescriptions',
-    enabled: false,
-    badge: 'Coming Soon',
-    roles: [USER_ROLES.ADMIN, USER_ROLES.PHARMACIST],
+    enabled: true,
+    roles: [USER_ROLES.ADMIN, USER_ROLES.PHARMACIST, USER_ROLES.CASHIER],
   },
   {
     id: 'reports',
-    label: 'Reports',
+    label: 'Reports & Analytics',
     icon: 'BarChart3',
     path: '/reports',
-    enabled: false,
-    badge: 'Coming Soon',
-    roles: [USER_ROLES.ADMIN],
+    enabled: true,
+    roles: [USER_ROLES.ADMIN, USER_ROLES.PHARMACIST, USER_ROLES.INVENTORY_MANAGER],
   },
   {
     id: 'settings',
@@ -470,6 +467,30 @@ export const PAYMENT_METHOD_CONFIGS = {
   bank_transfer: { label: 'Bank Transfer', icon: 'Building' },
   other: { label: 'Other', icon: 'Wallet' },
 };
+
+export const PRESCRIPTION_STATUS_CONFIGS = {
+  pending: {
+    label: 'Pending Verification',
+    color: 'text-amber-800 bg-amber-50 border-amber-300',
+    badgeVariant: 'warning',
+  },
+  verified: {
+    label: 'Verified (Valid Rx)',
+    color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+    badgeVariant: 'success',
+  },
+  rejected: {
+    label: 'Rejected',
+    color: 'text-rose-700 bg-rose-50 border-rose-200',
+    badgeVariant: 'danger',
+  },
+  expired: {
+    label: 'Expired',
+    color: 'text-slate-600 bg-slate-100 border-slate-200',
+    badgeVariant: 'neutral',
+  },
+};
+
 
 
 

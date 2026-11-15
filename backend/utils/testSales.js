@@ -57,14 +57,13 @@ async function runTests() {
   let createdSale1 = null;
   let createdSale2 = null;
 
-  // Scenario 1: Health check returns Phase 5 with version 5.0.0
-  await test('Scenario 1: Health check returns Phase 5 with version 5.0.0', async () => {
+  // Scenario 1: Health check returns API status
+  await test('Scenario 1: Health check returns valid API status and version >= 5.0.0', async () => {
     const res = await fetch(`${BASE_URL}/health`);
     const data = await res.json();
     assert.strictEqual(res.status, 200);
     assert.strictEqual(data.success, true);
-    assert.strictEqual(data.version, '5.0.0');
-    assert.ok(data.phase.includes('Phase 5'));
+    assert.ok(parseFloat(data.version) >= 5.0, `Version should be >= 5.0.0, got ${data.version}`);
   });
 
   // Scenario 2: Prepare inventory with Batch 1 (expires in 180 days)
@@ -433,3 +432,4 @@ if (require.main === module) {
 }
 
 module.exports = runTests;
+

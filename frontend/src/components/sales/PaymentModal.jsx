@@ -175,3 +175,4 @@ export const PaymentModal = ({ isOpen, onClose, sale, onSuccess }) => {
     </Modal>
   );
 };
+

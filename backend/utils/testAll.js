@@ -10,6 +10,9 @@ const tests = [
   { name: 'Phase 3: Inventory Management Suite', script: 'testInventory.js' },
   { name: 'Phase 4: Supplier & Purchase Management Suite', script: 'testPurchases.js' },
   { name: 'Phase 5: Sales, POS & Billing Suite', script: 'testSales.js' },
+  { name: 'Phase 6: Customer & Prescription Management Suite', script: 'testCustomersAndPrescriptions.js' },
+  { name: 'Phase 7: Reports & Analytics Suite', script: 'testReports.js' },
+  { name: 'Phase 8: End-to-End Integration Workflows Suite', script: 'testIntegrationWorkflows.js' },
 ];
 
 let allPassed = true;

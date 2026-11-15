@@ -52,3 +52,4 @@ export const SaleStatusBadge = ({ status, type = 'payment', size = 'md' }) => {
       );
   }
 };
+

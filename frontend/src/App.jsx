@@ -35,6 +35,26 @@ import SalesListPage from './pages/sales/SalesListPage';
 import POSPage from './pages/sales/POSPage';
 import SaleDetailsPage from './pages/sales/SaleDetailsPage';
 
+// Phase 6: Customer Pages
+import CustomerListPage from './pages/customers/CustomerListPage';
+import AddCustomerPage from './pages/customers/AddCustomerPage';
+import EditCustomerPage from './pages/customers/EditCustomerPage';
+import CustomerDetailsPage from './pages/customers/CustomerDetailsPage';
+
+// Phase 6: Prescription Pages
+import PrescriptionListPage from './pages/prescriptions/PrescriptionListPage';
+import AddPrescriptionPage from './pages/prescriptions/AddPrescriptionPage';
+import PrescriptionDetailsPage from './pages/prescriptions/PrescriptionDetailsPage';
+
+// Phase 7: Reports & Analytics Pages
+import ReportsDashboardPage from './pages/reports/ReportsDashboardPage';
+import SalesReportPage from './pages/reports/SalesReportPage';
+import InventoryReportPage from './pages/reports/InventoryReportPage';
+import PurchaseReportPage from './pages/reports/PurchaseReportPage';
+import ProfitLossReportPage from './pages/reports/ProfitLossReportPage';
+import MedicinePerformancePage from './pages/reports/MedicinePerformancePage';
+import CustomerReportPage from './pages/reports/CustomerReportPage';
+
 function App() {
   return (
     <BrowserRouter>
@@ -170,6 +190,110 @@ function App() {
               }
             />
             <Route path="/sales/:id" element={<SaleDetailsPage />} />
+
+            {/* Customer Management (Phase 6) */}
+            <Route path="/customers" element={<CustomerListPage />} />
+            <Route
+              path="/customers/new"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist', 'cashier']}>
+                  <AddCustomerPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/customers/:id" element={<CustomerDetailsPage />} />
+            <Route
+              path="/customers/:id/edit"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist', 'cashier']}>
+                  <EditCustomerPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Prescription Management (Phase 6) */}
+            <Route
+              path="/prescriptions"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist']}>
+                  <PrescriptionListPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/prescriptions/new"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist']}>
+                  <AddPrescriptionPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/prescriptions/:id"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist']}>
+                  <PrescriptionDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Reports & Analytics (Phase 7) */}
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist', 'inventory_manager']}>
+                  <ReportsDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/sales"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist']}>
+                  <SalesReportPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/inventory"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist', 'inventory_manager']}>
+                  <InventoryReportPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/purchases"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'inventory_manager']}>
+                  <PurchaseReportPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/profit-loss"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist']}>
+                  <ProfitLossReportPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/medicines"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist']}>
+                  <MedicinePerformancePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/customers"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'pharmacist']}>
+                  <CustomerReportPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* Fallback Root & Unknown Routes */}

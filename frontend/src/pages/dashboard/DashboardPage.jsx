@@ -27,6 +27,8 @@ import inventoryService from '../../services/inventoryService';
 import supplierService from '../../services/supplierService';
 import purchaseService from '../../services/purchaseService';
 import salesService from '../../services/salesService';
+import customerService from '../../services/customerService';
+import prescriptionService from '../../services/prescriptionService';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -40,6 +42,8 @@ export default function DashboardPage() {
   const [liveRecentSales, setLiveRecentSales] = useState([]);
   const [liveLowStock, setLiveLowStock] = useState([]);
   const [liveExpiring, setLiveExpiring] = useState([]);
+  const [liveCustomerStats, setLiveCustomerStats] = useState(null);
+  const [livePendingPrescriptions, setLivePendingPrescriptions] = useState([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   const todayDateString = new Intl.DateTimeFormat('en-US', {
@@ -52,7 +56,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [medsRes, invSummaryRes, lowRes, expRes, supRes, poRes, salesStatsRes, salesListRes] = await Promise.allSettled([
+        const [medsRes, invSummaryRes, lowRes, expRes, supRes, poRes, salesStatsRes, salesListRes, custRes, rxRes] = await Promise.allSettled([
           medicineService.getMedicineStats(),
           inventoryService.getInventorySummary(),
           inventoryService.getLowStockMedicines(),
@@ -61,6 +65,8 @@ export default function DashboardPage() {
           purchaseService.getPurchaseStats(),
           salesService.getSaleStats(),
           salesService.getSales({ limit: 5 }),
+          customerService.getCustomerStats(),
+          prescriptionService.getPrescriptions({ status: 'pending', limit: 5 }),
         ]);
 
         if (medsRes.status === 'fulfilled' && medsRes.value.success) {
@@ -87,6 +93,12 @@ export default function DashboardPage() {
         if (salesListRes.status === 'fulfilled' && salesListRes.value.success) {
           setLiveRecentSales(salesListRes.value.data?.sales || []);
         }
+        if (custRes.status === 'fulfilled' && custRes.value.success) {
+          setLiveCustomerStats(custRes.value.data);
+        }
+        if (rxRes.status === 'fulfilled' && rxRes.value.success) {
+          setLivePendingPrescriptions(rxRes.value.data?.prescriptions || []);
+        }
       } catch (err) {
         console.error('Error fetching dashboard live data:', err);
       } finally {
@@ -105,7 +117,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-200 border border-teal-400/30 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-teal-300" />
-              Phase 5: Sales, POS &amp; Billing Active
+              PharmaCore v8.0 Production System
             </span>
             <span className="text-xs text-teal-200/80 flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
@@ -116,12 +128,12 @@ export default function DashboardPage() {
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
             Welcome back, {user?.name || 'Administrator'}
           </h2>
-          <p className="text-xs sm:text-sm text-teal-100/80 mt-1 max-w-xl">
+          <p className="text-xs sm:text-sm text-teal-100/80 mt-1 max-w-2xl">
             You are signed in as{' '}
             <strong className="text-white">
               {ROLE_LABELS[user?.role] || user?.role}
             </strong>
-            . Live MongoDB formulary catalog, batch tracking, FEFO dispatch, vendor directory, and POS point-of-sale checkout with tax invoices are fully operational.
+            . All 8 modules are fully operational: Medicines Formulary, FEFO Inventory, Vendors, Purchases, POS &amp; Invoices, Patients, Prescriptions, and Executive Business Intelligence.
           </p>
         </div>
 
@@ -142,7 +154,7 @@ export default function DashboardPage() {
       <div className="bg-teal-50/70 border border-teal-200/80 rounded-xl px-4 py-3 flex items-start gap-3 text-xs text-teal-950">
         <Database className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" />
         <div className="leading-relaxed">
-          <span className="font-semibold text-teal-900">Database Integration Active:</span> <strong>Total Medicines</strong>, <strong>Low Stock Thresholds</strong>, <strong>Active Suppliers</strong>, <strong>Purchase Orders</strong>, and <strong>Point of Sale (POS) Billing &amp; Invoices</strong> are connected live to MongoDB records (Phases 1-5).
+          <span className="font-semibold text-teal-900">Live Database Integration:</span> <strong>Total Formulary Medicines</strong>, <strong>FEFO Inventory Batches</strong>, <strong>Suppliers</strong>, <strong>Purchase Orders</strong>, <strong>POS Sales &amp; Billing</strong>, <strong>Patient Records</strong>, and <strong>Doctor Prescriptions</strong> are synced in real-time with MongoDB.
         </div>
       </div>
 

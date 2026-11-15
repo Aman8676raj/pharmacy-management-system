@@ -55,3 +55,4 @@ salePaymentSchema.index({ receivedBy: 1 });
 const SalePayment = mongoose.model('SalePayment', salePaymentSchema);
 
 module.exports = SalePayment;
+

@@ -246,3 +246,4 @@ class InvoiceService {
 }
 
 module.exports = new InvoiceService();
+

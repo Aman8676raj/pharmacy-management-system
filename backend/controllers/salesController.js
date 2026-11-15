@@ -147,3 +147,4 @@ class SalesController {
 }
 
 module.exports = new SalesController();
+
