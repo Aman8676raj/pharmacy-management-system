@@ -1,0 +1,23 @@
+{
+  "name": "pharmacy-management-system",
+  "version": "1.0.0",
+  "description": "Pharmacy Management System (PMS) - Phase 1 Foundation",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "seed": "npm --prefix backend run seed",
+    "start:backend": "npm --prefix backend start"
+  },
+  "keywords": [
+    "pharmacy",
+    "management",
+    "react",
+    "vite",
+    "nodejs",
+    "express",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "ISC"
+}
